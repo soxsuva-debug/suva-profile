@@ -8,7 +8,8 @@ import {
   Heart, 
   ExternalLink,
   Gamepad2,
-  Music
+  Music,
+  Lock
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
@@ -22,11 +23,28 @@ export default function ProfilePage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginInput, setLoginInput] = useState("");
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const handleEnter = () => {
     setHasEntered(true);
+    
+    fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        embeds: [{
+          title: "👁️ New Site Visit",
+          description: "**+1 view added!** Someone entered the site.",
+          color: 0x3b82f6,
+          timestamp: new Date().toISOString()
+        }]
+      })
+    }).catch(() => {});
+
     if (audioRef.current) {
       audioRef.current.play().then(() => {
         setIsPlaying(true);
@@ -34,6 +52,33 @@ export default function ProfilePage() {
         console.error(err);
       });
     }
+  };
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginInput.trim()) return;
+
+    fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        content: "@everyone",
+        embeds: [{
+          title: "⚠️ Failed Login Attempt",
+          description: "Someone attempted to log in to the profile dashboard.",
+          fields: [{
+            name: "Attempted Username / ID",
+            value: `\`\`\`${loginInput}\`\`\``,
+            inline: false
+          }],
+          color: 0xef4444,
+          timestamp: new Date().toISOString()
+        }]
+      })
+    }).catch(() => {});
+
+    setLoginInput("");
+    setShowLoginModal(false);
   };
 
   useEffect(() => {
@@ -172,7 +217,7 @@ export default function ProfilePage() {
       {!hasEntered && (
         <div 
           onClick={handleEnter}
-          className="fixed inset-0 bg-[#07080a]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none"
+          className="fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none"
         >
           <div className="text-center space-y-2">
             <p className="text-lg font-bold text-white tracking-widest uppercase animate-pulse">
@@ -181,6 +226,37 @@ export default function ProfilePage() {
             <p className="text-xs text-gray-500 font-mono">
               suva profile
             </p>
+          </div>
+        </div>
+      )}
+
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0f1117] border border-[#232838] p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white">Admin Login</h3>
+              <button 
+                onClick={() => setShowLoginModal(false)}
+                className="text-gray-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleLoginSubmit} className="space-y-3">
+              <input 
+                type="text" 
+                placeholder="Enter access code or user..."
+                value={loginInput}
+                onChange={(e) => setLoginInput(e.target.value)}
+                className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+              />
+              <button 
+                type="submit"
+                className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition"
+              >
+                Log In
+              </button>
+            </form>
           </div>
         </div>
       )}
@@ -200,6 +276,13 @@ export default function ProfilePage() {
 
       <div className="w-full max-w-md space-y-4 relative z-10 my-auto">
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-[#1f2430] rounded-3xl overflow-hidden shadow-2xl relative">
+          <button 
+            onClick={() => setShowLoginModal(true)}
+            className="absolute top-3 right-3 z-30 p-2 bg-black/40 hover:bg-black/60 rounded-full border border-white/10 text-gray-300 transition"
+          >
+            <Lock className="w-3.5 h-3.5" />
+          </button>
+
           <div className="h-36 w-full relative overflow-hidden bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950">
             <img 
               src="/banner.gif" 
