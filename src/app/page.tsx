@@ -1,327 +1,469 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Play,
-  Pause,
-  Repeat,
-  RotateCcw,
-  Volume2,
-  Heart,
-  MessageSquare,
-  Eye,
-  CheckCircle2,
-  Diamond,
-  Code2,
-  LogIn,
+import { 
+  Play, Pause, Heart, Eye, Settings, Volume2, VolumeX, 
+  RotateCcw, ShieldCheck, Code, Sparkles, Check, X, Gamepad2, Disc
 } from "lucide-react";
-
-const PROFILE_DATA = {
-  username: "suva",
-  displayName: "suva.uk",
-  status: "Editor",
-  bannerImg: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000",
-  avatarImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=500",
-  views: 1026,
-  initialLikes: 8,
-  quotes: [
-    { text: 'She like, "Why you heartless?"', author: "Nemzzz" },
-    { text: "These hoes won't even get it", author: "Nemzzz" },
-    { text: "Started from the bottom", author: "Now we're here" },
-  ],
-  song: {
-    title: "90mph",
-    artist: "JBEE",
-    duration: "4:55",
-    cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300",
-  },
-  roblox: {
-    name: "ALEX",
-    handle: "@B9X1Q",
-    friends: "25",
-    followers: "19.6K",
-    following: "2",
-  },
-};
 
 export default function ProfilePage() {
   const [entered, setEntered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [likes, setLikes] = useState(PROFILE_DATA.initialLikes);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTimeStr, setCurrentTimeStr] = useState("0:00");
+  const [durationStr, setDurationStr] = useState("0:00");
+  const [likes, setLikes] = useState(8);
   const [hasLiked, setHasLiked] = useState(false);
-  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [views, setViews] = useState(1026);
+  const [showAdmin, setShowAdmin] = useState(false);
 
+  // Pre-loaded with your Discord User ID
+  const [discordId, setDiscordId] = useState("1491533148914450614");
+  const [discordData, setDiscordData] = useState<any>(null);
+
+  // Profile Customization State
+  const [profile, setProfile] = useState({
+    username: "suva.uk",
+    tagline: "hi",
+    role: "Editor",
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+    bannerUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+    songTitle: "90mph",
+    artistName: "JBEE",
+    songUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    albumCoverUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&auto=format&fit=crop&q=80"
+  });
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch live Discord status from Lanyard API
   useEffect(() => {
-    const interval = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % PROFILE_DATA.quotes.length);
-    }, 4000);
+    if (!discordId) return;
+
+    const fetchDiscordStatus = async () => {
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
+        const data = await res.json();
+        if (data.success) {
+          setDiscordData(data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching Lanyard status:", err);
+      }
+    };
+
+    fetchDiscordStatus();
+    const interval = setInterval(fetchDiscordStatus, 10000); // Polls every 10 seconds
     return () => clearInterval(interval);
+  }, [discordId]);
+
+  // Keyboard shortcut to open admin modal (Ctrl + Shift + A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        setShowAdmin((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const handleEnter = () => {
     setEntered(true);
-    setIsPlaying(true);
+    setViews((prev) => prev + 1);
+    if (audioRef.current) {
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    audioRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const handleTimeUpdate = () => {
+    if (!audioRef.current) return;
+    const current = audioRef.current.currentTime;
+    const duration = audioRef.current.duration || 1;
+    setProgress((current / duration) * 100);
+
+    const cMin = Math.floor(current / 60);
+    const cSec = Math.floor(current % 60).toString().padStart(2, "0");
+    setCurrentTimeStr(`${cMin}:${cSec}`);
+
+    if (audioRef.current.duration) {
+      const dMin = Math.floor(duration / 60);
+      const dSec = Math.floor(duration % 60).toString().padStart(2, "0");
+      setDurationStr(`${dMin}:${dSec}`);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!audioRef.current) return;
+    const newTime = (parseFloat(e.target.value) / 100) * (audioRef.current.duration || 0);
+    audioRef.current.currentTime = newTime;
+    setProgress(parseFloat(e.target.value));
   };
 
   const handleLike = () => {
     if (!hasLiked) {
       setLikes((prev) => prev + 1);
       setHasLiked(true);
+    } else {
+      setLikes((prev) => prev - 1);
+      setHasLiked(false);
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "online": return "bg-emerald-500";
+      case "idle": return "bg-amber-500";
+      case "dnd": return "bg-rose-500";
+      default: return "bg-zinc-500";
+    }
+  };
+
+  const currentActivity = discordData?.activities?.find((a: any) => a.type === 0);
+  const spotifyData = discordData?.spotify;
+
   return (
-    <div className="relative min-h-screen bg-black text-white font-sans selection:bg-white/20 overflow-x-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900/40 via-black to-black pointer-events-none" />
+    <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center p-4 relative overflow-hidden select-none">
+      <audio
+        ref={audioRef}
+        src={profile.songUrl}
+        onTimeUpdate={handleTimeUpdate}
+        loop
+      />
 
+      {/* Enter Screen Overlay */}
       <AnimatePresence>
-        {!entered ? (
+        {!entered && (
           <motion.div
-            key="landing"
-            exit={{ opacity: 0, scale: 1.05, filter: "blur(12px)" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.6 }}
             onClick={handleEnter}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer bg-black"
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center cursor-pointer"
           >
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-5xl font-extrabold tracking-tight text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]"
+            <motion.h1 
+              animate={{ opacity: [0.6, 1, 0.6] }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="text-4xl md:text-6xl font-extrabold tracking-tight mb-2 text-white"
             >
-              {PROFILE_DATA.displayName}
+              {profile.username}
             </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.2, 0.8, 0.2] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              className="mt-8 text-xs font-semibold tracking-[0.35em] text-neutral-400 uppercase"
-            >
-              CLICK TO ENTER
-            </motion.p>
+            <p className="text-xs uppercase tracking-widest text-zinc-400 font-medium">
+              Click to Enter
+            </p>
           </motion.div>
-        ) : (
-          <motion.main
-            key="main"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-[420px] my-8 space-y-4"
-          >
-            <div className="relative bg-[#0d0d0d]/80 backdrop-blur-2xl border border-white/10 rounded-[28px] overflow-hidden shadow-2xl">
-              <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-xs font-medium text-neutral-300">
-                <Eye className="w-3.5 h-3.5 text-neutral-400" />
-                <span>{PROFILE_DATA.views.toLocaleString()}</span>
+        )}
+      </AnimatePresence>
+
+      {/* Main Profile Card */}
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: entered ? 1 : 0.95, opacity: entered ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-sm rounded-3xl bg-zinc-900/80 border border-zinc-800/80 shadow-2xl backdrop-blur-xl overflow-hidden relative"
+      >
+        {/* Admin Settings Cog */}
+        <button
+          onClick={() => setShowAdmin(true)}
+          className="absolute top-3 left-3 z-20 p-2 rounded-full bg-black/40 hover:bg-black/70 border border-white/10 text-zinc-400 hover:text-white transition"
+          title="Open Admin Panel"
+        >
+          <Settings size={16} />
+        </button>
+
+        {/* View Counter Badge */}
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 border border-white/10 text-xs text-zinc-300 backdrop-blur-md">
+          <Eye size={12} />
+          <span>{views.toLocaleString()}</span>
+        </div>
+
+        {/* Banner */}
+        <div className="h-32 w-full relative overflow-hidden bg-zinc-800">
+          <img
+            src={profile.bannerUrl}
+            alt="Banner"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-zinc-900/90" />
+        </div>
+
+        {/* Profile Content */}
+        <div className="px-6 pb-6 pt-0 relative flex flex-col items-center text-center -mt-12">
+          {/* Avatar with Live Discord Avatar & Status Indicator */}
+          <div className="relative mb-3">
+            <img
+              src={discordData?.discord_user?.avatar ? `https://cdn.discordapp.com/avatars/${discordId}/${discordData.discord_user.avatar}.png` : profile.avatarUrl}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full object-cover border-4 border-zinc-900 shadow-xl"
+            />
+            <div 
+              className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-zinc-900 ${getStatusColor(discordData?.discord_status)}`}
+              title={`Discord Status: ${discordData?.discord_status || "offline"}`}
+            />
+          </div>
+
+          {/* User Info */}
+          <h2 className="text-xl font-bold tracking-wide text-white">{profile.username}</h2>
+          
+          <div className="flex items-center gap-2 my-2">
+            <span className="p-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20"><ShieldCheck size={14} /></span>
+            <span className="p-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><Sparkles size={14} /></span>
+            <span className="p-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20"><Code size={14} /></span>
+          </div>
+
+          <p className="text-sm font-medium text-zinc-400 mb-3">{profile.role}</p>
+
+          {/* Bio / Quote Container */}
+          <div className="w-full py-2.5 px-4 rounded-2xl bg-zinc-800/40 border border-zinc-800/60 mb-3 text-center">
+            <p className="text-sm italic text-zinc-300">{profile.tagline}</p>
+          </div>
+
+          {/* Live Discord Activity / Game Status */}
+          {currentActivity && (
+            <div className="w-full p-3 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 mb-3 text-left flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+                <Gamepad2 size={20} />
               </div>
-
-              <div className="h-32 w-full relative overflow-hidden bg-neutral-900">
-                <img
-                  src={PROFILE_DATA.bannerImg}
-                  alt="Banner"
-                  className="w-full h-full object-cover opacity-60 grayscale"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0d0d0d]" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Playing Now</p>
+                <p className="text-xs font-semibold text-white truncate">{currentActivity.name}</p>
+                {currentActivity.details && <p className="text-[11px] text-zinc-400 truncate">{currentActivity.details}</p>}
               </div>
+            </div>
+          )}
 
-              <div className="px-6 pb-6 pt-0 relative flex flex-col items-center text-center -mt-14">
-                <div className="relative w-24 h-24 mb-3">
-                  <img
-                    src={PROFILE_DATA.avatarImg}
-                    alt="Avatar"
-                    className="w-full h-full rounded-full object-cover border-2 border-white/20 shadow-lg"
-                  />
-                  <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-neutral-500 border-2 border-black rounded-full" />
-                </div>
-
-                <h2 className="text-2xl font-bold tracking-tight text-white mb-2">
-                  {PROFILE_DATA.displayName}
-                </h2>
-
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-3">
-                  <div className="p-1 rounded-md bg-blue-600/20 text-blue-400">
-                    <CheckCircle2 className="w-4 h-4 fill-blue-500 text-black" />
-                  </div>
-                  <div className="p-1 rounded-md bg-cyan-500/20 text-cyan-300">
-                    <Diamond className="w-4 h-4 fill-cyan-400 text-black" />
-                  </div>
-                  <div className="p-1 rounded-md bg-emerald-500/20 text-emerald-400">
-                    <Code2 className="w-4 h-4" />
-                  </div>
-                </div>
-
-                <p className="text-sm font-medium text-neutral-400 mb-5">
-                  {PROFILE_DATA.status}<span className="animate-pulse">|</span>
+          {/* Live Spotify Status */}
+          {spotifyData && (
+            <div className="w-full p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 mb-3 text-left flex items-center gap-3">
+              <img src={spotifyData.album_art_url} alt="Spotify" className="w-10 h-10 rounded-lg object-cover" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider flex items-center gap-1">
+                  <Disc size={10} className="animate-spin" /> Listening to Spotify
                 </p>
+                <p className="text-xs font-semibold text-white truncate">{spotifyData.song}</p>
+                <p className="text-[11px] text-zinc-400 truncate">{spotifyData.artist}</p>
+              </div>
+            </div>
+          )}
 
-                <div className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/5 mb-4 text-center">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={quoteIndex}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-1"
-                    >
-                      <p className="text-xs italic font-medium text-neutral-200">
-                        {PROFILE_DATA.quotes[quoteIndex].text}
-                      </p>
-                      <p className="text-[11px] text-neutral-500">
-                        ~{PROFILE_DATA.quotes[quoteIndex].author}
-                      </p>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  <div className="flex justify-center gap-1.5 mt-3">
-                    {PROFILE_DATA.quotes.map((_, i) => (
-                      <span
-                        key={i}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          i === quoteIndex ? "w-5 bg-white" : "w-1.5 bg-white/20"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-left">
-                  <div className="flex items-center gap-3 mb-3">
-                    <img
-                      src={PROFILE_DATA.song.cover}
-                      alt="Album Cover"
-                      className="w-12 h-12 rounded-xl object-cover border border-white/10"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-white truncate">
-                        {PROFILE_DATA.song.title}
-                      </h4>
-                      <p className="text-xs text-neutral-400 truncate">
-                        {PROFILE_DATA.song.artist}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 mb-3">
-                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                      <div className="w-1/4 h-full bg-emerald-500 rounded-full" />
-                    </div>
-                    <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
-                      <span>0:15</span>
-                      <span>{PROFILE_DATA.song.duration}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between px-2">
-                    <button className="text-neutral-500 hover:text-white transition">
-                      <Repeat className="w-4 h-4 text-emerald-500" />
-                    </button>
-                    <button className="text-neutral-500 hover:text-white transition">
-                      <RotateCcw className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setIsPlaying(!isPlaying)}
-                      className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition shadow-lg"
-                    >
-                      {isPlaying ? (
-                        <Pause className="w-4 h-4 fill-black" />
-                      ) : (
-                        <Play className="w-4 h-4 fill-black translate-x-0.5" />
-                      )}
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <Volume2 className="w-4 h-4 text-neutral-400" />
-                      <div className="w-12 h-1 bg-white/20 rounded-full">
-                        <div className="w-3/4 h-full bg-white rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between w-full mt-4 pt-2">
-                  <button
-                    onClick={handleLike}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-xs text-neutral-300 hover:bg-white/10 transition"
-                  >
-                    <Heart
-                      className={`w-3.5 h-3.5 ${
-                        hasLiked ? "fill-pink-500 text-pink-500" : "text-neutral-400"
-                      }`}
-                    />
-                    <span>{likes}</span>
-                  </button>
-
-                  <button className="flex items-center gap-1.5 text-xs text-neutral-300 hover:text-white transition font-medium">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>Message Me</span>
-                  </button>
-                </div>
+          {/* Audio Player */}
+          <div className="w-full p-3.5 rounded-2xl bg-zinc-800/50 border border-zinc-800/80 mb-4 text-left">
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src={profile.albumCoverUrl}
+                alt="Album Cover"
+                className="w-12 h-12 rounded-xl object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">{profile.songTitle}</p>
+                <p className="text-xs text-zinc-400 truncate">{profile.artistName}</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 py-1">
-              {["tiktok", "instagram", "discord", "twitch", "snapchat"].map((platform) => (
-                <button
-                  key={platform}
-                  className="w-11 h-11 rounded-2xl bg-[#0d0d0d]/80 backdrop-blur-xl border border-white/10 flex items-center justify-center text-neutral-400 hover:text-white hover:border-white/30 transition shadow-lg"
-                >
-                  <span className="capitalize text-xs font-bold">{platform[0]}</span>
-                </button>
-              ))}
+            {/* Scrubber Bar */}
+            <div className="space-y-1">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={progress}
+                onChange={handleSeek}
+                className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              />
+              <div className="flex justify-between text-[10px] text-zinc-400 font-mono">
+                <span>{currentTimeStr}</span>
+                <span>{durationStr}</span>
+              </div>
             </div>
 
-            <div className="bg-[#0d0d0d]/80 backdrop-blur-2xl border border-white/10 rounded-[24px] p-4 shadow-2xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-neutral-800 border border-white/10 overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=200"
-                    alt="Roblox Avatar"
-                    className="w-full h-full object-cover"
+            {/* Controls */}
+            <div className="flex items-center justify-between mt-2 pt-1">
+              <button 
+                onClick={() => { if (audioRef.current) audioRef.current.currentTime = 0; }} 
+                className="text-zinc-400 hover:text-white transition"
+              >
+                <RotateCcw size={16} />
+              </button>
+              
+              <button
+                onClick={togglePlay}
+                className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition"
+              >
+                {isPlaying ? <Pause size={16} fill="black" /> : <Play size={16} fill="black" className="ml-0.5" />}
+              </button>
+
+              <button onClick={toggleMute} className="text-zinc-400 hover:text-white transition">
+                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Actions Bar */}
+          <div className="w-full flex items-center justify-between pt-1">
+            <button
+              onClick={handleLike}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${
+                hasLiked
+                  ? "bg-rose-500/20 border-rose-500/40 text-rose-400"
+                  : "bg-zinc-800/60 border-zinc-700/50 text-zinc-300 hover:bg-zinc-800"
+              }`}
+            >
+              <Heart size={14} className={hasLiked ? "fill-rose-400" : ""} />
+              <span>{likes}</span>
+            </button>
+
+            <span className="text-[11px] text-zinc-500 font-mono">
+              {profile.username}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Embedded Admin Modal */}
+      <AnimatePresence>
+        {showAdmin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]"
+            >
+              <div className="flex items-center justify-between mb-4 border-b border-zinc-800 pb-3">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Settings size={18} /> Admin Customizer
+                </h3>
+                <button
+                  onClick={() => setShowAdmin(false)}
+                  className="p-1 text-zinc-400 hover:text-white transition"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-indigo-400 font-bold mb-1">Discord User ID</label>
+                  <input
+                    type="text"
+                    value={discordId}
+                    onChange={(e) => setDiscordId(e.target.value)}
+                    className="w-full bg-zinc-800 border border-indigo-500/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
+
                 <div>
-                  <span className="text-[10px] font-bold tracking-widest text-neutral-500 uppercase block">
-                    ROBLOX
-                  </span>
-                  <h3 className="text-sm font-bold text-white">{PROFILE_DATA.roblox.name}</h3>
-                  <p className="text-xs text-neutral-400">{PROFILE_DATA.roblox.handle}</p>
+                  <label className="block text-zinc-400 mb-1">Username</label>
+                  <input
+                    type="text"
+                    value={profile.username}
+                    onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Tagline / Text</label>
+                  <input
+                    type="text"
+                    value={profile.tagline}
+                    onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Role Title</label>
+                  <input
+                    type="text"
+                    value={profile.role}
+                    onChange={(e) => setProfile({ ...profile, role: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Avatar Image URL</label>
+                  <input
+                    type="text"
+                    value={profile.avatarUrl}
+                    onChange={(e) => setProfile({ ...profile, avatarUrl: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Banner Image URL</label>
+                  <input
+                    type="text"
+                    value={profile.bannerUrl}
+                    onChange={(e) => setProfile({ ...profile, bannerUrl: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Song Title</label>
+                  <input
+                    type="text"
+                    value={profile.songTitle}
+                    onChange={(e) => setProfile({ ...profile, songTitle: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Artist Name</label>
+                  <input
+                    type="text"
+                    value={profile.artistName}
+                    onChange={(e) => setProfile({ ...profile, artistName: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Audio Direct MP3 URL</label>
+                  <input
+                    type="text"
+                    value={profile.songUrl}
+                    onChange={(e) => setProfile({ ...profile, songUrl: e.target.value })}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 text-center border-t border-white/5 pt-3">
-                <div>
-                  <p className="text-sm font-bold text-white">{PROFILE_DATA.roblox.friends}</p>
-                  <p className="text-[10px] font-medium text-neutral-500 tracking-wider uppercase">
-                    FRIENDS
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">{PROFILE_DATA.roblox.followers}</p>
-                  <p className="text-[10px] font-medium text-neutral-500 tracking-wider uppercase">
-                    FOLLOWERS
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">{PROFILE_DATA.roblox.following}</p>
-                  <p className="text-[10px] font-medium text-neutral-500 tracking-wider uppercase">
-                    FOLLOWING
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center gap-2 pt-2 text-xs text-neutral-500">
-              <a
-                href="/admin"
-                className="flex items-center gap-1.5 hover:text-neutral-300 transition font-medium"
+              <button
+                onClick={() => setShowAdmin(false)}
+                className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2"
               >
-                <LogIn className="w-3.5 h-3.5" /> Admin Login
-              </a>
-              <p className="text-[11px] text-neutral-600">
-                Created by <span className="text-neutral-400 font-medium">suva.uk</span>
-              </p>
-            </div>
-          </motion.main>
+                <Check size={16} /> Save & Apply
+              </button>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
