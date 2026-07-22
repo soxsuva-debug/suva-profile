@@ -16,6 +16,7 @@ const DISCORD_USER_ID = "1491533148914450614";
 
 export default function ProfilePage() {
   const [hasEntered, setHasEntered] = useState(false);
+  const [isFading, setIsFading] = useState(false);
   const [lanyardData, setLanyardData] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -30,7 +31,10 @@ export default function ProfilePage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const handleEnter = () => {
-    setHasEntered(true);
+    setIsFading(true);
+    setTimeout(() => {
+      setHasEntered(true);
+    }, 500);
     
     fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
       method: "POST",
@@ -214,17 +218,20 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-[#07080a] text-white flex flex-col items-center justify-start p-4 sm:p-6 font-sans relative overflow-hidden">
+      <canvas 
+        ref={canvasRef} 
+        className="fixed inset-0 pointer-events-none z-0"
+      />
+
       {!hasEntered && (
         <div 
           onClick={handleEnter}
-          className="fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none"
+          className={`fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none ${isFading ? "opacity-0" : "opacity-100"}`}
         >
           <div className="text-center space-y-2">
-            <p className="text-lg font-bold text-white tracking-widest uppercase animate-pulse">
-              [ Click anywhere to enter ]
-            </p>
-            <p className="text-xs text-gray-500 font-mono">
-              suva profile
+            <h1 className="text-4xl font-extrabold text-white tracking-tight">suva.uk</h1>
+            <p className="text-xs text-gray-400 tracking-[0.25em] uppercase font-medium">
+              CLICK TO ENTER
             </p>
           </div>
         </div>
@@ -260,11 +267,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-
-      <canvas 
-        ref={canvasRef} 
-        className="fixed inset-0 pointer-events-none z-0"
-      />
 
       <audio 
         ref={audioRef}
