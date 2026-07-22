@@ -17,10 +17,10 @@ const DISCORD_USER_ID = "1491533148914450614";
 
 export const metadata = {
   title: "suva.",
-  description: "welcome to my site",
+  description: "welcome to my profile",
   openGraph: {
     title: "suva.",
-    description: "welcome to my site",
+    description: "welcome to my profile",
     images: [
       {
         url: "/banner.gif",
