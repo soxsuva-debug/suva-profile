@@ -7,47 +7,43 @@ import {
   RotateCcw, Lock, KeyRound, ExternalLink, Check, X
 } from "lucide-react";
 
-// Discord Badge SVGs
+// Crisp SVG Icons
 const ActiveDevBadge = () => (
-  <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
+  <svg className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/>
   </svg>
 );
 const NitroBadge = () => (
-  <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+  <svg className="w-4 h-4 text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]" viewBox="0 0 24 24" fill="currentColor">
     <path d="M7.5 3L2 12l5.5 9h9L22 12l-5.5-9h-9zm1.8 3h5.4L18.6 12l-3.9 6H9.3L5.4 12l3.9-6z"/>
   </svg>
 );
 const BoostBadge = () => (
-  <svg className="w-4 h-4 text-pink-400" viewBox="0 0 24 24" fill="currentColor">
+  <svg className="w-4 h-4 text-pink-400 drop-shadow-[0_0_8px_rgba(244,114,182,0.8)]" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2L2 19h20L12 2zm0 4l6.5 11h-13L12 6z"/>
   </svg>
 );
 const HypeSquadBadge = () => (
-  <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+  <svg className="w-4 h-4 text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.8)]" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2L1 12l11 10 11-10L12 2zm0 3.8l7 6.2-7 6.2-7-6.2 7-6.2z"/>
   </svg>
 );
 
-// Connection Logos
 const RobloxIcon = () => (
   <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
     <path d="M5.164 0L0 18.836 18.836 24 24 5.164 5.164 0zm10.231 13.682l-5.113-1.37 1.37-5.113 5.113 1.37-1.37 5.113z"/>
   </svg>
 );
-
 const SpotifyIcon = () => (
   <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.899 4.56-1.021 8.52-.6 11.64 1.32.42.18.48.66.301 1.019zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.18-1.2-.18-1.38-.72-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.72 1.62.54.3.72 1.02.42 1.56-.3.42-1.02.6-1.56.3z"/>
   </svg>
 );
-
 const XboxIcon = () => (
   <svg className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
     <path d="M11.975 0C5.396 0 0 5.371 0 11.975c0 6.604 5.396 12.025 11.975 12.025 6.58 0 12.025-5.421 12.025-12.025C24 5.371 18.555 0 11.975 0zm.025 3.325c2.825 0 5.362 1.05 7.338 2.788-1.125.862-2.738 2.012-4.8 3.512C13.238 8.65 12.575 8.012 12 8.012c-.575 0-1.238.638-2.538 1.613-2.062-1.5-3.675-2.65-4.8-3.513 1.976-1.737 4.513-2.787 7.338-2.787zM4.325 7.725c1.175.912 2.763 2.075 4.8 3.562-1.575 1.4-2.825 2.713-3.725 3.913-1.05-1.163-1.788-2.588-2.075-4.163.225-1.212.688-2.325 1.35-3.312zm15.35 0c.662.987 1.125 2.1 1.35 3.312-.287 1.575-1.025 3-2.075 4.163-.9-1.2-2.15-2.513-3.725-3.913 2.037-1.487 3.625-2.65 4.8-3.562z"/>
   </svg>
 );
-
 const TikTokIcon = () => (
   <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12.525 0h3.08c.12 1.73.91 3.2 2.21 4.1 1.04.73 2.3 1.15 3.61 1.19V8.4c-1.89-.02-3.64-.62-5.11-1.66V15c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9 9c.53 0 1.04.05 1.54.14V17.3c-.5-.14-1.01-.22-1.54-.22-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6V0z"/>
@@ -62,9 +58,10 @@ export default function ProfilePage() {
   const [currentTimeStr, setCurrentTimeStr] = useState("0:00");
   const [durationStr, setDurationStr] = useState("0:00");
 
-  const [likes, setLikes] = useState(14);
+  // View Counter starting at 1, Likes starting at 0
+  const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
-  const [views, setViews] = useState(128);
+  const [views, setViews] = useState(1);
 
   const [showAdmin, setShowAdmin] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
@@ -75,26 +72,26 @@ export default function ProfilePage() {
   const [discordId] = useState("1491533148914450614");
   const [discordData, setDiscordData] = useState<any>(null);
 
+  // Exact Images from user request
   const [profile, setProfile] = useState({
     username: "suva.",
     handle: "soxsuvaa",
     pronouns: "she/her",
     tagline: "hi",
-    // User requested avatar URL (from Photo Booth image)
-    avatarUrl: "https://i.ibb.co/689yYx4/suva-pfp.png", 
     bannerUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZydWJuaGt5dm5uZHB3czB2MmxlOW4yc244ZjE5bzVjZmJkZnh5NiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKRn6q8RylCkh0y/giphy.gif",
+    avatarUrl: "https://i.postimg.cc/9Fz1f9g5/avatar-blue.png",
     songTitle: "misery",
     artistName: "pupsies",
-    songUrl: "/pupsies-misery.mp3",
-    albumCoverUrl: "/misery.jpg"
+    albumCoverUrl: "https://i.postimg.cc/mD821w8v/misery-cover.jpg",
+    songUrl: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const savedViews = parseInt(localStorage.getItem("suva_views") || "128", 10);
-    const savedLikes = parseInt(localStorage.getItem("suva_likes") || "14", 10);
-    const userLiked = localStorage.getItem("suva_has_liked") === "true";
+    const savedViews = parseInt(localStorage.getItem("suva_views_reset") || "1", 10);
+    const savedLikes = parseInt(localStorage.getItem("suva_likes_reset") || "0", 10);
+    const userLiked = localStorage.getItem("suva_has_liked_reset") === "true";
 
     setViews(savedViews);
     setLikes(savedLikes);
@@ -103,7 +100,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!discordId) return;
-
     const fetchDiscord = async () => {
       try {
         const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
@@ -115,7 +111,6 @@ export default function ProfilePage() {
         console.error("Lanyard error:", e);
       }
     };
-
     fetchDiscord();
     const interval = setInterval(fetchDiscord, 10000);
     return () => clearInterval(interval);
@@ -124,16 +119,16 @@ export default function ProfilePage() {
   const handleEnter = () => {
     setEntered(true);
     
-    if (!localStorage.getItem("suva_has_viewed")) {
+    if (!localStorage.getItem("suva_has_viewed_reset")) {
       const nextViews = views + 1;
       setViews(nextViews);
-      localStorage.setItem("suva_views", nextViews.toString());
-      localStorage.setItem("suva_has_viewed", "true");
+      localStorage.setItem("suva_views_reset", nextViews.toString());
+      localStorage.setItem("suva_has_viewed_reset", "true");
     }
 
     if (audioRef.current) {
       audioRef.current.play().then(() => setIsPlaying(true)).catch((err) => {
-        console.log("Audio play error:", err);
+        console.log("Autoplay error:", err);
       });
     }
   };
@@ -184,14 +179,14 @@ export default function ProfilePage() {
       newLikes = likes + 1;
       setLikes(newLikes);
       setHasLiked(true);
-      localStorage.setItem("suva_has_liked", "true");
+      localStorage.setItem("suva_has_liked_reset", "true");
     } else {
       newLikes = Math.max(0, likes - 1);
       setLikes(newLikes);
       setHasLiked(false);
-      localStorage.setItem("suva_has_liked", "false");
+      localStorage.setItem("suva_has_liked_reset", "false");
     }
-    localStorage.setItem("suva_likes", newLikes.toString());
+    localStorage.setItem("suva_likes_reset", newLikes.toString());
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -224,9 +219,9 @@ export default function ProfilePage() {
         loop
       />
 
-      {/* Atmospheric Particles Background */}
+      {/* Floating Animated Ambient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(25)].map((_, i) => (
+        {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             initial={{ 
@@ -245,7 +240,7 @@ export default function ProfilePage() {
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="absolute w-2 h-2 bg-blue-300/30 rounded-full blur-[1px]"
+            className="absolute w-2 h-2 bg-blue-400/30 rounded-full blur-[1px]"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
@@ -276,9 +271,9 @@ export default function ProfilePage() {
               <motion.h1 
                 animate={{ 
                   textShadow: [
-                    "0 0 20px rgba(99,102,241,0.3)",
-                    "0 0 40px rgba(168,85,247,0.6)",
-                    "0 0 20px rgba(99,102,241,0.3)"
+                    "0 0 20px rgba(99,102,241,0.4)",
+                    "0 0 40px rgba(168,85,247,0.7)",
+                    "0 0 20px rgba(99,102,241,0.4)"
                   ]
                 }} 
                 transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
@@ -306,13 +301,13 @@ export default function ProfilePage() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-[380px] space-y-4 relative z-10 my-8"
       >
-        {/* Main Profile Glass Card */}
-        <div className="rounded-[32px] bg-zinc-950/60 border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-3xl overflow-hidden relative">
+        {/* Main Profile Glass Card with Neon Glowing Border */}
+        <div className="rounded-[32px] bg-zinc-950/70 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.25)] backdrop-blur-3xl overflow-hidden relative">
           
           {/* Views Counter */}
-          <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 border border-white/10 text-[11px] text-zinc-300 backdrop-blur-md shadow-xl">
+          <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-white/10 text-[11px] text-zinc-300 backdrop-blur-md shadow-xl">
             <Eye size={12} className="text-blue-400 animate-pulse" />
-            <span className="font-mono font-medium">{views.toLocaleString()}</span>
+            <span className="font-mono font-medium">{views}</span>
           </div>
 
           {/* Banner */}
@@ -337,7 +332,7 @@ export default function ProfilePage() {
                 <img
                   src={profile.avatarUrl}
                   alt="Avatar"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-zinc-950/90 shadow-2xl ring-1 ring-white/10"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-zinc-950 shadow-2xl ring-1 ring-blue-500/40"
                 />
                 <div 
                   className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-zinc-950 ${getStatusColor(discordData?.discord_status)}`}
@@ -358,10 +353,10 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            {/* Real Discord Badges */}
-            <div className="flex items-center gap-2 my-2 py-1 px-3 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-md">
+            {/* Badges */}
+            <div className="flex items-center gap-2.5 my-2 py-1.5 px-3.5 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md shadow-inner">
               <span title="Active Developer"><ActiveDevBadge /></span>
-              <span title="Subscriber / Nitro"><NitroBadge /></span>
+              <span title="Nitro"><NitroBadge /></span>
               <span title="Server Booster"><BoostBadge /></span>
               <span title="HypeSquad"><HypeSquadBadge /></span>
             </div>
@@ -455,16 +450,24 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* TikTok Card (Replacing Roblox Card) */}
-        <div className="p-4 rounded-3xl bg-zinc-950/60 border border-white/10 backdrop-blur-3xl text-left shadow-xl">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-xl bg-black border border-white/10 text-white">
-              <TikTokIcon />
+        {/* Clickable TikTok Profile Card */}
+        <a 
+          href="https://www.tiktok.com/@not.p1nk" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="block p-4 rounded-3xl bg-zinc-950/70 border border-white/10 hover:border-pink-500/50 backdrop-blur-3xl text-left shadow-xl transition group"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-black border border-white/10 text-white group-hover:border-pink-500/50 transition">
+                <TikTokIcon />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">TikTok</p>
+                <p className="text-sm font-bold text-white leading-tight">P1NKK <span className="text-xs font-normal text-zinc-400">@not.p1nk</span></p>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">TikTok</p>
-              <p className="text-sm font-bold text-white leading-tight">P1NKK <span className="text-xs font-normal text-zinc-400">@not.p1nk</span></p>
-            </div>
+            <ExternalLink size={14} className="text-zinc-500 group-hover:text-pink-400 transition" />
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-white/5">
@@ -481,38 +484,48 @@ export default function ProfilePage() {
               <p className="text-[9px] uppercase font-bold text-zinc-500">Likes</p>
             </div>
           </div>
-        </div>
+        </a>
 
-        {/* Connections Box */}
-        <div className="p-4 rounded-3xl bg-zinc-950/60 border border-white/10 backdrop-blur-3xl text-left shadow-xl space-y-3">
+        {/* Connections Box with Working External Links */}
+        <div className="p-4 rounded-3xl bg-zinc-950/70 border border-white/10 backdrop-blur-3xl text-left shadow-xl space-y-3">
           <p className="text-xs font-bold text-zinc-400 tracking-wider">Connections</p>
 
           <div className="space-y-2">
-            {/* Roblox Connection */}
-            <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.02] border border-white/5">
+            {/* Roblox */}
+            <a 
+              href="https://www.roblox.com/users/serdemsivridagg/profile" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/20 transition group"
+            >
               <div className="flex items-center gap-2.5">
                 <RobloxIcon />
                 <span className="text-xs font-medium text-zinc-200">serdemsivridagg</span>
               </div>
-              <div className="flex items-center gap-1.5 text-zinc-400">
+              <div className="flex items-center gap-1.5 text-zinc-400 group-hover:text-white transition">
                 <Check size={13} className="text-emerald-400" />
                 <ExternalLink size={12} />
               </div>
-            </div>
+            </a>
 
-            {/* Spotify Connection */}
-            <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.02] border border-white/5">
+            {/* Spotify */}
+            <a 
+              href="https://open.spotify.com/user/soxsuva" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition group"
+            >
               <div className="flex items-center gap-2.5">
                 <SpotifyIcon />
                 <span className="text-xs font-medium text-zinc-200">soxsuva</span>
               </div>
-              <div className="flex items-center gap-1.5 text-zinc-400">
+              <div className="flex items-center gap-1.5 text-zinc-400 group-hover:text-emerald-400 transition">
                 <Check size={13} className="text-emerald-400" />
                 <ExternalLink size={12} />
               </div>
-            </div>
+            </a>
 
-            {/* Xbox Connection */}
+            {/* Xbox */}
             <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.02] border border-white/5">
               <div className="flex items-center gap-2.5">
                 <XboxIcon />
@@ -525,7 +538,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Admin Login Modal Trigger */}
+        {/* Admin Login Trigger */}
         <div className="text-center pt-2">
           <button
             onClick={() => setShowAdmin(true)}
@@ -537,7 +550,7 @@ export default function ProfilePage() {
         </div>
       </motion.div>
 
-      {/* Admin Modal */}
+      {/* Admin Login Modal */}
       <AnimatePresence>
         {showAdmin && (
           <motion.div
@@ -550,7 +563,7 @@ export default function ProfilePage() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-md bg-zinc-950 border border-white/10 rounded-3xl p-6 shadow-2xl relative"
+              className="w-full max-w-md bg-zinc-950 border border-white/10 rounded-3xl p-6 shadow-2xl relative text-left"
             >
               <button
                 onClick={() => setShowAdmin(false)}
@@ -560,7 +573,7 @@ export default function ProfilePage() {
               </button>
 
               {!isAuthenticated ? (
-                <form onSubmit={handleLogin} autoComplete="off" className="space-y-4 py-2 text-left">
+                <form onSubmit={handleLogin} autoComplete="off" className="space-y-4 py-2">
                   <div className="flex items-center gap-2 text-rose-400 font-bold text-lg mb-1">
                     <KeyRound size={20} /> Owner Admin Access
                   </div>
@@ -597,7 +610,7 @@ export default function ProfilePage() {
                       />
                     </div>
 
-                    {authError && <p className="text-xs text-rose-500 mt-1 font-medium">Invalid credentials. Try again.</p>}
+                    {authError && <p className="text-xs text-rose-500 mt-1 font-medium">Invalid credentials.</p>}
                   </div>
 
                   <button
@@ -608,7 +621,7 @@ export default function ProfilePage() {
                   </button>
                 </form>
               ) : (
-                <div className="space-y-4 text-xs text-left max-h-[75vh] overflow-y-auto pr-1">
+                <div className="space-y-4 text-xs max-h-[75vh] overflow-y-auto pr-1">
                   <h3 className="text-lg font-bold text-white border-b border-zinc-800 pb-2">Admin Customizer</h3>
 
                   <div>
@@ -617,26 +630,6 @@ export default function ProfilePage() {
                       type="text"
                       value={profile.username}
                       onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-zinc-400 mb-1">Avatar Image URL</label>
-                    <input
-                      type="text"
-                      value={profile.avatarUrl}
-                      onChange={(e) => setProfile({ ...profile, avatarUrl: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-zinc-400 mb-1">Tagline</label>
-                    <input
-                      type="text"
-                      value={profile.tagline}
-                      onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
                       className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-white focus:outline-none"
                     />
                   </div>
