@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
+const CORRECT_ADMIN_CODE = "Bullhorn79!";
 
 export default function ProfilePage() {
   const [hasEntered, setHasEntered] = useState(false);
@@ -28,30 +29,76 @@ export default function ProfilePage() {
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginInput, setLoginInput] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Load saved likes, views, and returning user check from localStorage
+  useEffect(() => {
+    const savedLikes = localStorage.getItem("profile_liked");
+    const savedLikeCount = localStorage.getItem("profile_like_count");
+    const savedViews = localStorage.getItem("profile_view_count");
+
+    if (savedLikes === "true") {
+      setLiked(true);
+    }
+    if (savedLikeCount !== null) {
+      setLikeCount(Number(savedLikeCount));
+    } else {
+      setLikeCount(14); // Default base likes if not set
+    }
+
+    if (savedViews !== null) {
+      setViewCount(Number(savedViews));
+    } else {
+      setViewCount(3); // Default base views
+    }
+  }, []);
 
   const handleEnter = () => {
     setIsFading(true);
     setTimeout(() => {
       setHasEntered(true);
     }, 500);
-    
-    setViewCount(prev => prev + 1);
 
-    fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        embeds: [{
-          title: "👁️ New Site Visit",
-          description: "**+1 view added!** Someone entered the site.",
-          color: 0x6c96fb,
-          timestamp: new Date().toISOString()
-        }]
-      })
-    }).catch(() => {});
+    const hasVisitedBefore = localStorage.getItem("profile_visited");
+    let currentViews = viewCount;
+
+    if (!hasVisitedBefore) {
+      // First time visitor
+      localStorage.setItem("profile_visited", "true");
+      currentViews += 1;
+      setViewCount(currentViews);
+      localStorage.setItem("profile_view_count", String(currentViews));
+
+      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embeds: [{
+            title: "👁️ New Site Visit",
+            description: "**+1 view added!** A new user entered the site.",
+            color: 0x6c96fb,
+            timestamp: new Date().toISOString()
+          }]
+        })
+      }).catch(() => {});
+    } else {
+      // Returning user
+      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embeds: [{
+            title: "🔄 Returning User Visit",
+            description: "A returning user has entered the site.",
+            color: 0x34d399,
+            timestamp: new Date().toISOString()
+          }]
+        })
+      }).catch(() => {});
+    }
 
     if (audioRef.current) {
       audioRef.current.play().then(() => {
@@ -66,24 +113,40 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!loginInput.trim()) return;
 
-    fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        content: "@everyone",
-        embeds: [{
-          title: "⚠️ Failed Login Attempt",
-          description: "Someone attempted to log in to the profile dashboard.",
-          fields: [{
-            name: "Attempted Username / ID",
-            value: `\`\`\`${loginInput}\`\`\``,
-            inline: false
-          }],
-          color: 0x6c96fb,
-          timestamp: new Date().toISOString()
-        }]
-      })
-    }).catch(() => {});
+    if (loginInput === CORRECT_ADMIN_CODE) {
+      setLoginSuccess(true);
+      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          content: "@everyone",
+          embeds: [{
+            title: "🔓 Successful Admin Login",
+            description: "The correct admin password was entered successfully!",
+            color: 0x22c55e,
+            timestamp: new Date().toISOString()
+          }]
+        })
+      }).catch(() => {});
+    } else {
+      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          embeds: [{
+            title: "⚠️ Failed Login Attempt",
+            description: "Someone attempted to log in with an incorrect code.",
+            fields: [{
+              name: "Attempted Code",
+              value: `\`\`\`${loginInput}\`\`\``,
+              inline: false
+            }],
+            color: 0xef4444,
+            timestamp: new Date().toISOString()
+          }]
+        })
+      }).catch(() => {});
+    }
 
     setLoginInput("");
     setShowLoginModal(false);
@@ -253,21 +316,27 @@ export default function ProfilePage() {
                 ✕
               </button>
             </div>
-            <form onSubmit={handleLoginSubmit} className="space-y-3">
-              <input 
-                type="text" 
-                placeholder="Enter access code or user..."
-                value={loginInput}
-                onChange={(e) => setLoginInput(e.target.value)}
-                className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
-              />
-              <button 
-                type="submit"
-                className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition"
-              >
-                Log In
-              </button>
-            </form>
+            {loginSuccess ? (
+              <div className="text-center py-4 text-emerald-400 text-xs font-semibold">
+                Access Granted! Welcome, Admin.
+              </div>
+            ) : (
+              <form onSubmit={handleLoginSubmit} className="space-y-3">
+                <input 
+                  type="password" 
+                  placeholder="Enter admin code..."
+                  value={loginInput}
+                  onChange={(e) => setLoginInput(e.target.value)}
+                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                />
+                <button 
+                  type="submit"
+                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition"
+                >
+                  Log In
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -432,8 +501,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 mt-3">
                 <button 
                   onClick={() => {
-                    setLiked(!liked);
-                    setLikeCount(prev => liked ? prev - 1 : prev + 1);
+                    const nextLikedState = !liked;
+                    const nextCount = nextLikedState ? likeCount + 1 : likeCount - 1;
+                    setLiked(nextLikedState);
+                    setLikeCount(nextCount);
+                    localStorage.setItem("profile_liked", String(nextLikedState));
+                    localStorage.setItem("profile_like_count", String(nextCount));
                   }}
                   className="flex-1 py-2 bg-[#1b202c] hover:bg-[#222838] border border-[#2a3245] rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition"
                 >
