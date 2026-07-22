@@ -14,6 +14,7 @@ import {
 const DISCORD_USER_ID = "1491533148914450614";
 
 export default function ProfilePage() {
+  const [hasEntered, setHasEntered] = useState(false);
   const [lanyardData, setLanyardData] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -24,9 +25,17 @@ export default function ProfilePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // -------------------------------------------------------------
-  // FALLING CHERRY BLOSSOMS CANVAS ANIMATION
-  // -------------------------------------------------------------
+  const handleEnter = () => {
+    setHasEntered(true);
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.error(err);
+      });
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -44,7 +53,6 @@ export default function ProfilePage() {
     };
     window.addEventListener("resize", handleResize);
 
-    // Petal configuration
     const petals = Array.from({ length: 35 }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -76,7 +84,6 @@ export default function ProfilePage() {
         ctx.rotate(p.angle);
         ctx.globalAlpha = p.opacity;
 
-        // Soft blue / ice-cyan petal tint
         ctx.fillStyle = "#80caff";
         ctx.beginPath();
         ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, Math.PI * 2);
@@ -95,9 +102,6 @@ export default function ProfilePage() {
     };
   }, []);
 
-  // -------------------------------------------------------------
-  // DISCORD LANYARD PRESENCE FETCH
-  // -------------------------------------------------------------
   useEffect(() => {
     const fetchLanyard = async () => {
       try {
@@ -107,7 +111,7 @@ export default function ProfilePage() {
           setLanyardData(json.data);
         }
       } catch (err) {
-        console.error("Lanyard API error:", err);
+        console.error(err);
       }
     };
 
@@ -116,9 +120,6 @@ export default function ProfilePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // -------------------------------------------------------------
-  // AUDIO CONTROLS
-  // -------------------------------------------------------------
   const togglePlay = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
@@ -136,6 +137,12 @@ export default function ProfilePage() {
     }
   };
 
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration || 0);
+    }
+  };
+
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = Number(e.target.value);
     if (audioRef.current) {
@@ -145,13 +152,12 @@ export default function ProfilePage() {
   };
 
   const formatTime = (timeInSec: number) => {
-    if (isNaN(timeInSec)) return "0:00";
+    if (isNaN(timeInSec) || timeInSec === 0) return "0:00";
     const mins = Math.floor(timeInSec / 60);
     const secs = Math.floor(timeInSec % 60);
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // Activity extraction
   const gameActivity = lanyardData?.activities?.find((act: any) => act.type === 0);
   const spotifyActivity = lanyardData?.spotify;
 
@@ -163,27 +169,37 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-[#07080a] text-white flex flex-col items-center justify-start p-4 sm:p-6 font-sans relative overflow-hidden">
-      
-      {/* Background Canvas for Cherry Blossoms */}
+      {!hasEntered && (
+        <div 
+          onClick={handleEnter}
+          className="fixed inset-0 bg-[#07080a]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none"
+        >
+          <div className="text-center space-y-2">
+            <p className="text-lg font-bold text-white tracking-widest uppercase animate-pulse">
+              [ Click anywhere to enter ]
+            </p>
+            <p className="text-xs text-gray-500 font-mono">
+              suva profile
+            </p>
+          </div>
+        </div>
+      )}
+
       <canvas 
         ref={canvasRef} 
         className="fixed inset-0 pointer-events-none z-0"
       />
 
-      {/* Hidden Audio Element pointing to your public/song.mp3 */}
       <audio 
         ref={audioRef}
         src="/song.mp3"
         onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
       />
 
       <div className="w-full max-w-md space-y-4 relative z-10 my-auto">
-        
-        {/* MAIN PROFILE CARD */}
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-[#1f2430] rounded-3xl overflow-hidden shadow-2xl relative">
-          
-          {/* Banner */}
           <div className="h-36 w-full relative overflow-hidden bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950">
             <img 
               src="/banner.gif" 
@@ -193,7 +209,6 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Avatar & Header */}
           <div className="px-6 pt-0 pb-4 relative flex flex-col items-center -mt-12 z-20">
             <div className="relative">
               <img 
@@ -213,7 +228,6 @@ export default function ProfilePage() {
             <h1 className="text-2xl font-bold mt-2 tracking-wide text-white">suva.</h1>
             <p className="text-xs text-gray-400 font-medium">@soxsuvaa • she/her</p>
 
-            {/* Badges */}
             <div className="flex items-center gap-2 mt-3">
               <span className="px-2.5 py-0.5 text-xs font-semibold bg-[#171a24] border border-[#262c3d] rounded-full flex items-center gap-1 text-amber-400 shadow-sm">
                 ⚡ ZFC
@@ -227,7 +241,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* DYNAMIC ACTIVITY / GAME STATUS (GREEN BORDER AREA) */}
           <div className="px-5 mb-3">
             {gameActivity ? (
               <div className="bg-[#141822] border-2 border-emerald-500/90 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-lg shadow-emerald-950/30">
@@ -279,7 +292,6 @@ export default function ProfilePage() {
             ) : null}
           </div>
 
-          {/* MUSIC PLAYER */}
           <div className="px-5 pb-5">
             <div className="bg-[#141720] border border-[#232838] rounded-2xl p-4 shadow-inner">
               <div className="flex items-center justify-between gap-3">
@@ -313,7 +325,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Progress Slider */}
               <div className="mt-4 space-y-1">
                 <input 
                   type="range" 
@@ -329,7 +340,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Like Button */}
               <button 
                 onClick={() => {
                   setLiked(!liked);
@@ -342,10 +352,8 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
-
         </div>
 
-        {/* TIKTOK CARD */}
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-pink-500/30 rounded-3xl p-4 shadow-lg relative overflow-hidden">
           <a 
             href="https://www.tiktok.com/@not.p1nk" 
@@ -379,11 +387,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* CONNECTIONS CARD */}
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-[#1f2430] rounded-3xl p-5 space-y-3 shadow-xl">
           <h2 className="text-sm font-bold text-gray-300 tracking-wide px-1">Connections</h2>
 
-          {/* Roblox (Clickable) */}
           <a 
             href="https://www.roblox.com/users/2807349866/profile" 
             target="_blank" 
@@ -397,7 +403,6 @@ export default function ProfilePage() {
             <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition" />
           </a>
 
-          {/* Spotify (Non-Clickable) */}
           <div className="flex items-center justify-between bg-[#141720] border border-[#232838] p-3 rounded-2xl">
             <div className="flex items-center gap-3">
               <img src="/spotify.png" alt="Spotify" className="w-7 h-7 object-contain" />
@@ -405,7 +410,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Xbox (Non-Clickable) */}
           <div className="flex items-center justify-between bg-[#141720] border border-[#232838] p-3 rounded-2xl">
             <div className="flex items-center gap-3">
               <img src="/xbox.png" alt="Xbox" className="w-7 h-7 object-contain" />
@@ -413,7 +417,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-
       </div>
     </main>
   );
