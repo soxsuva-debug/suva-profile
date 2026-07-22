@@ -229,7 +229,7 @@ export default function ProfilePage() {
           className={`fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none ${isFading ? "opacity-0" : "opacity-100"}`}
         >
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-extrabold text-white tracking-tight">suva.uk</h1>
+            <h1 className="text-4xl font-extrabold text-white tracking-tight">suva.</h1>
             <p className="text-xs text-gray-400 tracking-[0.25em] uppercase font-medium">
               CLICK TO ENTER
             </p>
