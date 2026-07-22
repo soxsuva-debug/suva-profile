@@ -4,10 +4,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Play, Pause, Heart, Eye, Volume2, VolumeX, 
-  RotateCcw, Lock, KeyRound, ExternalLink, Check, X
+  RotateCcw, Lock, KeyRound, ExternalLink, Check, X, ShieldAlert, Sparkles
 } from "lucide-react";
 
-// Crisp SVG Badges
+// Discord & Social Icons
 const ActiveDevBadge = () => (
   <svg className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/>
@@ -62,9 +62,15 @@ export default function ProfilePage() {
   const [hasLiked, setHasLiked] = useState(false);
   const [views, setViews] = useState(1);
 
+  // Admin Modal States
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // IP-Based Unique Visitor View Increment
+  // Unique View Counter
   useEffect(() => {
     const handleUniqueView = async () => {
       try {
@@ -112,6 +118,13 @@ export default function ProfilePage() {
     setIsMuted(!isMuted);
   };
 
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!audioRef.current) return;
+    const seekTime = (parseFloat(e.target.value) / 100) * (audioRef.current.duration || 1);
+    audioRef.current.currentTime = seekTime;
+    setProgress(parseFloat(e.target.value));
+  };
+
   const handleTimeUpdate = () => {
     if (!audioRef.current) return;
     const current = audioRef.current.currentTime;
@@ -129,9 +142,29 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminPassword === "suva123") {
+      setIsAdminLoggedIn(true);
+      setShowAdminModal(false);
+      setLoginError("");
+    } else {
+      setLoginError("Invalid Admin Password");
+    }
+  };
+
+  const toggleLike = () => {
+    if (hasLiked) {
+      setLikes(likes - 1);
+      setHasLiked(false);
+    } else {
+      setLikes(likes + 1);
+      setHasLiked(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#07080c] text-white font-sans flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
-      {/* Audio Element linked to local file */}
       <audio
         ref={audioRef}
         src="/song.mp3"
@@ -139,7 +172,7 @@ export default function ProfilePage() {
         loop
       />
 
-      {/* Enter Overlay */}
+      {/* Enter Screen Overlay */}
       <AnimatePresence>
         {!entered && (
           <motion.div
@@ -158,46 +191,219 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* Profile Card */}
-      <div className="w-full max-w-[380px] rounded-[32px] bg-zinc-950/70 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.25)] backdrop-blur-3xl overflow-hidden relative">
-        <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-white/10 text-[11px] text-zinc-300">
-          <Eye size={12} className="text-blue-400" />
-          <span>{views}</span>
+      {/* Main Profile Card */}
+      <div className="w-full max-w-[400px] rounded-[32px] bg-zinc-950/70 border border-blue-500/30 shadow-[0_0_35px_rgba(59,130,246,0.25)] backdrop-blur-3xl overflow-hidden relative">
+        
+        {/* Top Header Buttons */}
+        <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-white/10 text-[11px] text-zinc-300">
+            <Eye size={12} className="text-blue-400" />
+            <span>{views}</span>
+          </div>
+
+          <button
+            onClick={() => setShowAdminModal(true)}
+            className="p-1.5 rounded-full bg-black/70 border border-white/10 text-zinc-400 hover:text-white hover:border-blue-500/50 transition-all"
+          >
+            <Lock size={12} />
+          </button>
         </div>
 
-        <div className="h-40 w-full relative bg-zinc-900">
+        {/* Banner */}
+        <div className="h-44 w-full relative bg-zinc-900">
           <img src="/banner.gif" alt="Banner" className="w-full h-full object-cover" />
         </div>
 
+        {/* Main Content */}
         <div className="px-6 pb-6 relative flex flex-col items-center text-center -mt-16">
-          <img src="/pfp.png" alt="Profile" className="w-24 h-24 rounded-full border-4 border-zinc-950 shadow-2xl mb-2" />
-          <h2 className="text-2xl font-black">suva.</h2>
-          <p className="text-xs text-zinc-400">@soxsuvaa • she/her</p>
+          
+          {/* Profile Picture with JPEG/JPG Dual Route Fallback */}
+          <div className="relative w-24 h-24 rounded-full border-4 border-zinc-950 shadow-2xl mb-2 overflow-hidden bg-zinc-900">
+            <img 
+              src="/pfp.jpeg" 
+              onError={(e) => {
+                // If .jpeg fails, try fallback to .jpg
+                (e.target as HTMLImageElement).src = "/pfp.jpg";
+              }}
+              alt="suva" 
+              className="w-full h-full object-cover" 
+            />
+          </div>
 
-          <div className="flex items-center gap-2.5 my-3">
+          <h2 className="text-2xl font-black text-white tracking-tight">suva.</h2>
+          <p className="text-xs text-zinc-400 font-medium">@soxsuvaa • she/her</p>
+
+          {/* Badges */}
+          <div className="flex items-center gap-2.5 my-3 bg-black/40 px-3 py-1.5 rounded-full border border-white/5">
             <ActiveDevBadge />
             <NitroBadge />
             <BoostBadge />
             <HypeSquadBadge />
           </div>
 
-          {/* Player */}
-          <div className="w-full p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 my-2 text-left">
-            <div className="flex items-center gap-3 mb-2">
-              <img src="/album.jpg" alt="Album" className="w-12 h-12 rounded-xl object-cover" />
-              <div>
-                <p className="text-xs font-bold">misery</p>
-                <p className="text-[11px] text-zinc-400">pupsies</p>
+          {/* Clean Music Player */}
+          <div className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/10 my-3 text-left backdrop-blur-md">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <img src="/album.jpg" alt="Album" className="w-12 h-12 rounded-xl object-cover shadow-md" />
+                <div>
+                  <p className="text-xs font-bold text-white">misery</p>
+                  <p className="text-[11px] text-zinc-400 font-medium">pupsies</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button onClick={toggleMute} className="p-2 text-zinc-400 hover:text-white transition">
+                  {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                </button>
+                <button onClick={togglePlay} className="p-2.5 bg-white text-black rounded-full hover:scale-105 transition shadow-lg">
+                  {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                </button>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <button onClick={togglePlay} className="p-2 bg-white text-black rounded-full">
-                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-              </button>
+
+            {/* Track Progress Bar */}
+            <div className="space-y-1">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={progress}
+                onChange={handleSeek}
+                className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+              <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
+                <span>{currentTimeStr}</span>
+                <span>{durationStr}</span>
+              </div>
             </div>
           </div>
+
+          {/* Social Connections Grid */}
+          <div className="w-full grid grid-cols-2 gap-2 my-2">
+            <a 
+              href="https://tiktok.com/@not.p1nk" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-2">
+                <TikTokIcon />
+                <span className="text-xs font-medium text-zinc-300">TikTok</span>
+              </div>
+              <ExternalLink size={12} className="text-zinc-500 group-hover:text-white transition" />
+            </a>
+
+            <a 
+              href="https://roblox.com/users/serdemsivridagg" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-2">
+                <RobloxIcon />
+                <span className="text-xs font-medium text-zinc-300">Roblox</span>
+              </div>
+              <ExternalLink size={12} className="text-zinc-500 group-hover:text-white transition" />
+            </a>
+
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SpotifyIcon />
+                <span className="text-xs font-medium text-zinc-300">Spotify</span>
+              </div>
+              <span className="text-[10px] text-emerald-400 font-mono">Active</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <XboxIcon />
+                <span className="text-xs font-medium text-zinc-300">Xbox</span>
+              </div>
+              <span className="text-[10px] text-emerald-400 font-mono">Online</span>
+            </div>
+          </div>
+
+          {/* Like Button */}
+          <button
+            onClick={toggleLike}
+            className={`w-full py-2.5 rounded-xl border font-medium text-xs flex items-center justify-center gap-2 transition ${
+              hasLiked 
+                ? "bg-pink-500/10 border-pink-500/40 text-pink-400" 
+                : "bg-white/[0.03] border-white/10 text-zinc-300 hover:border-white/20"
+            }`}
+          >
+            <Heart size={14} className={hasLiked ? "fill-pink-400 text-pink-400" : ""} />
+            <span>{likes} Likes</span>
+          </button>
+
         </div>
       </div>
+
+      {/* Admin Login Modal */}
+      <AnimatePresence>
+        {showAdminModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <div className="w-full max-w-sm rounded-2xl bg-zinc-950 border border-white/10 p-6 relative shadow-2xl">
+              <button 
+                onClick={() => setShowAdminModal(false)}
+                className="absolute top-4 right-4 text-zinc-400 hover:text-white"
+              >
+                <X size={16} />
+              </button>
+
+              {!isAdminLoggedIn ? (
+                <form onSubmit={handleAdminLogin} className="space-y-4">
+                  <div className="flex items-center gap-2 text-white font-bold">
+                    <KeyRound size={18} className="text-blue-400" />
+                    <h3>Admin Portal</h3>
+                  </div>
+                  <p className="text-xs text-zinc-400">Enter your passcode to manage profile configurations.</p>
+                  
+                  <input
+                    type="password"
+                    placeholder="Enter password..."
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                  />
+
+                  {loginError && <p className="text-[11px] text-red-400">{loginError}</p>}
+
+                  <button
+                    type="submit"
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition"
+                  >
+                    Authenticate
+                  </button>
+                </form>
+              ) : (
+                <div className="space-y-4 text-left">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                    <Sparkles size={18} />
+                    <h3>Admin Controls Active</h3>
+                  </div>
+                  <p className="text-xs text-zinc-400">You are logged in. View count overrides and custom badges unlocked.</p>
+                  <button
+                    onClick={() => {
+                      setIsAdminLoggedIn(false);
+                      setShowAdminModal(false);
+                    }}
+                    className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-semibold"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
