@@ -12,9 +12,7 @@ import {
   Lock,
   Eye,
   Settings,
-  Save,
-  Plus,
-  Trash2
+  Save
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
@@ -43,23 +41,18 @@ export default function ProfilePage() {
   const [loginInput, setLoginInput] = useState("");
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
 
-  // Editable Profile State
-  const [displayName, setDisplayName] = useState("suva.");
-  const [displayHandle, setDisplayHandle] = useState("@soxsuvaa • she/her");
+  // Editable Profile State (PFP, Banner, Music)
+  const [avatarUrl, setAvatarUrl] = useState("/pfp.jpeg");
+  const [bannerUrl, setBannerUrl] = useState("/banner.gif");
+  const [songUrl, setSongUrl] = useState("/song.mp3");
   const [songTitle, setSongTitle] = useState("misery");
   const [songArtist, setSongArtist] = useState("pupsies");
-  const [tiktokName, setTiktokName] = useState("P1NKK");
-  const [tiktokHandle, setTiktokHandle] = useState("@not.p1nk");
-  const [tiktokUrl, setTiktokUrl] = useState("https://www.tiktok.com/@not.p1nk");
-  const [tiktokFollowing, setTiktokFollowing] = useState("19");
-  const [tiktokFollowers, setTiktokFollowers] = useState("385");
-  const [tiktokLikes, setTiktokLikes] = useState("2.5K");
 
-  const [connections, setConnections] = useState<ConnectionItem[]>([
+  const connections: ConnectionItem[] = [
     { id: "1", platform: "Roblox", handle: "serdemsivridagg", url: "https://www.roblox.com/users/2807349866/profile" },
     { id: "2", platform: "Spotify", handle: "soxsuva", url: "" },
     { id: "3", platform: "Xbox", handle: "soxsuva", url: "" }
-  ]);
+  ];
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -74,36 +67,19 @@ export default function ProfilePage() {
     if (savedLikeCount !== null) setLikeCount(Number(savedLikeCount));
     if (savedViews !== null) setViewCount(Number(savedViews));
 
-    // Load customizable fields if saved by admin
-    if (localStorage.getItem("cfg_name")) setDisplayName(localStorage.getItem("cfg_name")!);
-    if (localStorage.getItem("cfg_handle")) setDisplayHandle(localStorage.getItem("cfg_handle")!);
+    if (localStorage.getItem("cfg_avatarUrl")) setAvatarUrl(localStorage.getItem("cfg_avatarUrl")!);
+    if (localStorage.getItem("cfg_bannerUrl")) setBannerUrl(localStorage.getItem("cfg_bannerUrl")!);
+    if (localStorage.getItem("cfg_songUrl")) setSongUrl(localStorage.getItem("cfg_songUrl")!);
     if (localStorage.getItem("cfg_songTitle")) setSongTitle(localStorage.getItem("cfg_songTitle")!);
     if (localStorage.getItem("cfg_songArtist")) setSongArtist(localStorage.getItem("cfg_songArtist")!);
-    if (localStorage.getItem("cfg_tiktokName")) setTiktokName(localStorage.getItem("cfg_tiktokName")!);
-    if (localStorage.getItem("cfg_tiktokHandle")) setTiktokHandle(localStorage.getItem("cfg_tiktokHandle")!);
-    if (localStorage.getItem("cfg_tiktokUrl")) setTiktokUrl(localStorage.getItem("cfg_tiktokUrl")!);
-    if (localStorage.getItem("cfg_tiktokFollowing")) setTiktokFollowing(localStorage.getItem("cfg_tiktokFollowing")!);
-    if (localStorage.getItem("cfg_tiktokFollowers")) setTiktokFollowers(localStorage.getItem("cfg_tiktokFollowers")!);
-    if (localStorage.getItem("cfg_tiktokLikes")) setTiktokLikes(localStorage.getItem("cfg_tiktokLikes")!);
-    
-    const savedConns = localStorage.getItem("cfg_connections");
-    if (savedConns) {
-      try { setConnections(JSON.parse(savedConns)); } catch (e) {}
-    }
   }, []);
 
   const saveAdminChanges = () => {
-    localStorage.setItem("cfg_name", displayName);
-    localStorage.setItem("cfg_handle", displayHandle);
+    localStorage.setItem("cfg_avatarUrl", avatarUrl);
+    localStorage.setItem("cfg_bannerUrl", bannerUrl);
+    localStorage.setItem("cfg_songUrl", songUrl);
     localStorage.setItem("cfg_songTitle", songTitle);
     localStorage.setItem("cfg_songArtist", songArtist);
-    localStorage.setItem("cfg_tiktokName", tiktokName);
-    localStorage.setItem("cfg_tiktokHandle", tiktokHandle);
-    localStorage.setItem("cfg_tiktokUrl", tiktokUrl);
-    localStorage.setItem("cfg_tiktokFollowing", tiktokFollowing);
-    localStorage.setItem("cfg_tiktokFollowers", tiktokFollowers);
-    localStorage.setItem("cfg_tiktokLikes", tiktokLikes);
-    localStorage.setItem("cfg_connections", JSON.stringify(connections));
     alert("Changes saved and published successfully!");
     setIsAdminDashboardOpen(false);
   };
@@ -347,7 +323,7 @@ export default function ProfilePage() {
           className={`fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none ${isFading ? "opacity-0" : "opacity-100"}`}
         >
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-extrabold text-white tracking-tight">{displayName}</h1>
+            <h1 className="text-4xl font-extrabold text-white tracking-tight">suva.</h1>
             <p className="text-xs text-gray-400 tracking-[0.25em] uppercase font-medium">
               CLICK TO ENTER
             </p>
@@ -388,11 +364,11 @@ export default function ProfilePage() {
 
       {isAdminDashboardOpen && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#0f1117] border border-[#232838] p-6 rounded-3xl w-full max-w-lg space-y-5 shadow-2xl my-8">
+          <div className="bg-[#0f1117] border border-[#232838] p-6 rounded-3xl w-full max-w-md space-y-5 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-[#232838] pb-3">
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-blue-500" />
-                <h3 className="text-base font-bold text-white">Admin Dashboard - Customize Site</h3>
+                <h3 className="text-base font-bold text-white">Admin Dashboard - Customize Profile</h3>
               </div>
               <button 
                 onClick={() => setIsAdminDashboardOpen(false)}
@@ -404,138 +380,56 @@ export default function ProfilePage() {
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-300">Display Name</label>
+                <label className="text-xs font-semibold text-gray-300">Avatar (PFP) URL/Path</label>
                 <input 
                   type="text" 
-                  value={displayName} 
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  value={avatarUrl} 
+                  onChange={(e) => setAvatarUrl(e.target.value)}
                   className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-300">Subtext / Handle</label>
+                <label className="text-xs font-semibold text-gray-300">Banner URL/Path</label>
                 <input 
                   type="text" 
-                  value={displayHandle} 
-                  onChange={(e) => setDisplayHandle(e.target.value)}
+                  value={bannerUrl} 
+                  onChange={(e) => setBannerUrl(e.target.value)}
                   className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-300">Music Player Song Title</label>
-                  <input 
-                    type="text" 
-                    value={songTitle} 
-                    onChange={(e) => setSongTitle(e.target.value)}
-                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-300">Music Player Artist</label>
-                  <input 
-                    type="text" 
-                    value={songArtist} 
-                    onChange={(e) => setSongArtist(e.target.value)}
-                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-              </div>
-
               <div className="border-t border-[#232838] pt-3 space-y-3">
-                <h4 className="text-xs font-bold text-pink-400 uppercase tracking-wider">TikTok Widget</h4>
+                <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Music Player Customization</h4>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-300">Audio File URL/Path (.mp3)</label>
+                  <input 
+                    type="text" 
+                    value={songUrl} 
+                    onChange={(e) => setSongUrl(e.target.value)}
+                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <input 
-                    type="text" 
-                    placeholder="TikTok Name" 
-                    value={tiktokName} 
-                    onChange={(e) => setTiktokName(e.target.value)}
-                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="TikTok Handle" 
-                    value={tiktokHandle} 
-                    onChange={(e) => setTiktokHandle(e.target.value)}
-                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-                <input 
-                  type="text" 
-                  placeholder="TikTok Profile URL" 
-                  value={tiktokUrl} 
-                  onChange={(e) => setTiktokUrl(e.target.value)}
-                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                />
-                <div className="grid grid-cols-3 gap-2">
-                  <input 
-                    type="text" 
-                    placeholder="Following" 
-                    value={tiktokFollowing} 
-                    onChange={(e) => setTiktokFollowing(e.target.value)}
-                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white text-center"
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="Followers" 
-                    value={tiktokFollowers} 
-                    onChange={(e) => setTiktokFollowers(e.target.value)}
-                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white text-center"
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="Likes" 
-                    value={tiktokLikes} 
-                    onChange={(e) => setTiktokLikes(e.target.value)}
-                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white text-center"
-                  />
-                </div>
-              </div>
-
-              <div className="border-t border-[#232838] pt-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-300 uppercase tracking-wider">Connections</h4>
-                  <button 
-                    onClick={() => setConnections([...connections, { id: Date.now().toString(), platform: "New", handle: "@user", url: "" }])}
-                    className="px-2 py-1 bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add
-                  </button>
-                </div>
-                {connections.map((conn, idx) => (
-                  <div key={conn.id} className="flex items-center gap-2 bg-[#141720] p-2 rounded-xl border border-[#232838]">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-300">Song Title</label>
                     <input 
                       type="text" 
-                      value={conn.platform}
-                      onChange={(e) => {
-                        const updated = [...connections];
-                        updated[idx].platform = e.target.value;
-                        setConnections(updated);
-                      }}
-                      className="w-1/3 bg-[#0f1117] border border-[#232838] rounded-lg px-2 py-1 text-xs text-white"
-                      placeholder="Platform"
+                      value={songTitle} 
+                      onChange={(e) => setSongTitle(e.target.value)}
+                      className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                     />
-                    <input 
-                      type="text" 
-                      value={conn.handle}
-                      onChange={(e) => {
-                        const updated = [...connections];
-                        updated[idx].handle = e.target.value;
-                        setConnections(updated);
-                      }}
-                      className="flex-1 bg-[#0f1117] border border-[#232838] rounded-lg px-2 py-1 text-xs text-white"
-                      placeholder="Handle"
-                    />
-                    <button 
-                      onClick={() => setConnections(connections.filter(c => c.id !== conn.id))}
-                      className="p-1 text-red-400 hover:text-red-300 transition"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
-                ))}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-300">Artist</label>
+                    <input 
+                      type="text" 
+                      value={songArtist} 
+                      onChange={(e) => setSongArtist(e.target.value)}
+                      className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -551,7 +445,7 @@ export default function ProfilePage() {
 
       <audio 
         ref={audioRef}
-        src="/song.mp3"
+        src={songUrl}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
@@ -568,7 +462,7 @@ export default function ProfilePage() {
 
           <div className="h-36 w-full relative overflow-hidden bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950">
             <img 
-              src="/banner.gif" 
+              src={bannerUrl} 
               alt="Banner" 
               className="w-full h-full object-cover relative z-10"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -578,9 +472,10 @@ export default function ProfilePage() {
           <div className="px-6 pt-0 pb-4 relative flex flex-col items-center -mt-12 z-20">
             <div className="relative">
               <img 
-                src="/pfp.jpeg" 
+                src={avatarUrl} 
                 alt="Avatar" 
                 className="w-24 h-24 rounded-full border-4 border-[#0f1117] object-cover shadow-2xl"
+                onError={(e) => { e.currentTarget.src = "/pfp.jpeg"; }}
               />
               <span 
                 className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-4 border-[#0f1117] ${
@@ -591,8 +486,8 @@ export default function ProfilePage() {
               />
             </div>
 
-            <h1 className="text-2xl font-bold mt-2 tracking-wide text-white">{displayName}</h1>
-            <p className="text-xs text-gray-400 font-medium">{displayHandle}</p>
+            <h1 className="text-2xl font-bold mt-2 tracking-wide text-white">suva.</h1>
+            <p className="text-xs text-gray-400 font-medium">@soxsuvaa • she/her</p>
 
             <div className="flex items-center gap-2 mt-3">
               <span className="px-2.5 py-0.5 text-xs font-semibold bg-[#171a24] border border-[#262c3d] rounded-full flex items-center gap-1 text-amber-400 shadow-sm">
@@ -733,7 +628,7 @@ export default function ProfilePage() {
 
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-pink-500/30 rounded-3xl p-4 shadow-lg relative overflow-hidden">
           <a 
-            href={tiktokUrl} 
+            href="https://www.tiktok.com/@not.p1nk" 
             target="_blank" 
             rel="noopener noreferrer"
             className="flex items-center justify-between p-2 rounded-2xl hover:bg-[#161922] transition"
@@ -742,7 +637,7 @@ export default function ProfilePage() {
               <img src="/tiktok.png" alt="TikTok" className="w-10 h-10 object-contain" />
               <div>
                 <span className="text-[10px] font-bold tracking-wider text-pink-400 uppercase block">TikTok</span>
-                <span className="text-sm font-bold text-white">{tiktokName} <span className="text-xs text-gray-400 font-normal">{tiktokHandle}</span></span>
+                <span className="text-sm font-bold text-white">P1NKK <span className="text-xs text-gray-400 font-normal">@not.p1nk</span></span>
               </div>
             </div>
             <ExternalLink className="w-4 h-4 text-gray-400" />
@@ -750,15 +645,15 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-3 gap-2 mt-3 text-center">
             <div className="bg-[#141720] p-2.5 rounded-xl border border-[#232838]">
-              <div className="text-xs font-bold text-white">{tiktokFollowing}</div>
+              <div className="text-xs font-bold text-white">19</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Following</div>
             </div>
             <div className="bg-[#141720] p-2.5 rounded-xl border border-[#232838]">
-              <div className="text-xs font-bold text-white">{tiktokFollowers}</div>
+              <div className="text-xs font-bold text-white">385</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Followers</div>
             </div>
             <div className="bg-[#141720] p-2.5 rounded-xl border border-[#232838]">
-              <div className="text-xs font-bold text-white">{tiktokLikes}</div>
+              <div className="text-xs font-bold text-white">2.5K</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Likes</div>
             </div>
           </div>
