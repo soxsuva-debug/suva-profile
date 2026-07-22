@@ -10,11 +10,22 @@ import {
   Gamepad2,
   Music,
   Lock,
-  Eye
+  Eye,
+  Settings,
+  Save,
+  Plus,
+  Trash2
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
 const CORRECT_ADMIN_CODE = "Bullhorn79!";
+
+interface ConnectionItem {
+  id: string;
+  platform: string;
+  handle: string;
+  url: string;
+}
 
 export default function ProfilePage() {
   const [hasEntered, setHasEntered] = useState(false);
@@ -23,38 +34,79 @@ export default function ProfilePage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [viewCount, setViewCount] = useState(3);
+  const [viewCount, setViewCount] = useState(1);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginInput, setLoginInput] = useState("");
-  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
+
+  // Editable Profile State
+  const [displayName, setDisplayName] = useState("suva.");
+  const [displayHandle, setDisplayHandle] = useState("@soxsuvaa • she/her");
+  const [songTitle, setSongTitle] = useState("misery");
+  const [songArtist, setSongArtist] = useState("pupsies");
+  const [tiktokName, setTiktokName] = useState("P1NKK");
+  const [tiktokHandle, setTiktokHandle] = useState("@not.p1nk");
+  const [tiktokUrl, setTiktokUrl] = useState("https://www.tiktok.com/@not.p1nk");
+  const [tiktokFollowing, setTiktokFollowing] = useState("19");
+  const [tiktokFollowers, setTiktokFollowers] = useState("385");
+  const [tiktokLikes, setTiktokLikes] = useState("2.5K");
+
+  const [connections, setConnections] = useState<ConnectionItem[]>([
+    { id: "1", platform: "Roblox", handle: "serdemsivridagg", url: "https://www.roblox.com/users/2807349866/profile" },
+    { id: "2", platform: "Spotify", handle: "soxsuva", url: "" },
+    { id: "3", platform: "Xbox", handle: "soxsuva", url: "" }
+  ]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Load saved likes, views, and returning user check from localStorage
+  // Load saved custom data and stats from localStorage
   useEffect(() => {
     const savedLikes = localStorage.getItem("profile_liked");
     const savedLikeCount = localStorage.getItem("profile_like_count");
     const savedViews = localStorage.getItem("profile_view_count");
 
-    if (savedLikes === "true") {
-      setLiked(true);
-    }
-    if (savedLikeCount !== null) {
-      setLikeCount(Number(savedLikeCount));
-    } else {
-      setLikeCount(14); // Default base likes if not set
-    }
+    if (savedLikes === "true") setLiked(true);
+    if (savedLikeCount !== null) setLikeCount(Number(savedLikeCount));
+    if (savedViews !== null) setViewCount(Number(savedViews));
 
-    if (savedViews !== null) {
-      setViewCount(Number(savedViews));
-    } else {
-      setViewCount(3); // Default base views
+    // Load customizable fields if saved by admin
+    if (localStorage.getItem("cfg_name")) setDisplayName(localStorage.getItem("cfg_name")!);
+    if (localStorage.getItem("cfg_handle")) setDisplayHandle(localStorage.getItem("cfg_handle")!);
+    if (localStorage.getItem("cfg_songTitle")) setSongTitle(localStorage.getItem("cfg_songTitle")!);
+    if (localStorage.getItem("cfg_songArtist")) setSongArtist(localStorage.getItem("cfg_songArtist")!);
+    if (localStorage.getItem("cfg_tiktokName")) setTiktokName(localStorage.getItem("cfg_tiktokName")!);
+    if (localStorage.getItem("cfg_tiktokHandle")) setTiktokHandle(localStorage.getItem("cfg_tiktokHandle")!);
+    if (localStorage.getItem("cfg_tiktokUrl")) setTiktokUrl(localStorage.getItem("cfg_tiktokUrl")!);
+    if (localStorage.getItem("cfg_tiktokFollowing")) setTiktokFollowing(localStorage.getItem("cfg_tiktokFollowing")!);
+    if (localStorage.getItem("cfg_tiktokFollowers")) setTiktokFollowers(localStorage.getItem("cfg_tiktokFollowers")!);
+    if (localStorage.getItem("cfg_tiktokLikes")) setTiktokLikes(localStorage.getItem("cfg_tiktokLikes")!);
+    
+    const savedConns = localStorage.getItem("cfg_connections");
+    if (savedConns) {
+      try { setConnections(JSON.parse(savedConns)); } catch (e) {}
     }
   }, []);
+
+  const saveAdminChanges = () => {
+    localStorage.setItem("cfg_name", displayName);
+    localStorage.setItem("cfg_handle", displayHandle);
+    localStorage.setItem("cfg_songTitle", songTitle);
+    localStorage.setItem("cfg_songArtist", songArtist);
+    localStorage.setItem("cfg_tiktokName", tiktokName);
+    localStorage.setItem("cfg_tiktokHandle", tiktokHandle);
+    localStorage.setItem("cfg_tiktokUrl", tiktokUrl);
+    localStorage.setItem("cfg_tiktokFollowing", tiktokFollowing);
+    localStorage.setItem("cfg_tiktokFollowers", tiktokFollowers);
+    localStorage.setItem("cfg_tiktokLikes", tiktokLikes);
+    localStorage.setItem("cfg_connections", JSON.stringify(connections));
+    alert("Changes saved and published successfully!");
+    setIsAdminDashboardOpen(false);
+  };
 
   const handleEnter = () => {
     setIsFading(true);
@@ -66,7 +118,6 @@ export default function ProfilePage() {
     let currentViews = viewCount;
 
     if (!hasVisitedBefore) {
-      // First time visitor
       localStorage.setItem("profile_visited", "true");
       currentViews += 1;
       setViewCount(currentViews);
@@ -85,7 +136,6 @@ export default function ProfilePage() {
         })
       }).catch(() => {});
     } else {
-      // Returning user
       fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -114,7 +164,8 @@ export default function ProfilePage() {
     if (!loginInput.trim()) return;
 
     if (loginInput === CORRECT_ADMIN_CODE) {
-      setLoginSuccess(true);
+      setShowLoginModal(false);
+      setIsAdminDashboardOpen(true);
       fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,7 +173,7 @@ export default function ProfilePage() {
           content: "@everyone",
           embeds: [{
             title: "🔓 Successful Admin Login",
-            description: "The correct admin password was entered successfully!",
+            description: "Admin dashboard accessed successfully!",
             color: 0x22c55e,
             timestamp: new Date().toISOString()
           }]
@@ -146,10 +197,10 @@ export default function ProfilePage() {
           }]
         })
       }).catch(() => {});
+      alert("Incorrect admin code!");
     }
 
     setLoginInput("");
-    setShowLoginModal(false);
   };
 
   useEffect(() => {
@@ -296,7 +347,7 @@ export default function ProfilePage() {
           className={`fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none ${isFading ? "opacity-0" : "opacity-100"}`}
         >
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-extrabold text-white tracking-tight">suva.</h1>
+            <h1 className="text-4xl font-extrabold text-white tracking-tight">{displayName}</h1>
             <p className="text-xs text-gray-400 tracking-[0.25em] uppercase font-medium">
               CLICK TO ENTER
             </p>
@@ -316,27 +367,184 @@ export default function ProfilePage() {
                 ✕
               </button>
             </div>
-            {loginSuccess ? (
-              <div className="text-center py-4 text-emerald-400 text-xs font-semibold">
-                Access Granted! Welcome, Admin.
+            <form onSubmit={handleLoginSubmit} className="space-y-3">
+              <input 
+                type="password" 
+                placeholder="Enter admin code..."
+                value={loginInput}
+                onChange={(e) => setLoginInput(e.target.value)}
+                className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+              />
+              <button 
+                type="submit"
+                className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition"
+              >
+                Log In
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isAdminDashboardOpen && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#0f1117] border border-[#232838] p-6 rounded-3xl w-full max-w-lg space-y-5 shadow-2xl my-8">
+            <div className="flex items-center justify-between border-b border-[#232838] pb-3">
+              <div className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-500" />
+                <h3 className="text-base font-bold text-white">Admin Dashboard - Customize Site</h3>
               </div>
-            ) : (
-              <form onSubmit={handleLoginSubmit} className="space-y-3">
+              <button 
+                onClick={() => setIsAdminDashboardOpen(false)}
+                className="text-gray-400 hover:text-white text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-300">Display Name</label>
                 <input 
-                  type="password" 
-                  placeholder="Enter admin code..."
-                  value={loginInput}
-                  onChange={(e) => setLoginInput(e.target.value)}
-                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                  type="text" 
+                  value={displayName} 
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                 />
-                <button 
-                  type="submit"
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition"
-                >
-                  Log In
-                </button>
-              </form>
-            )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-300">Subtext / Handle</label>
+                <input 
+                  type="text" 
+                  value={displayHandle} 
+                  onChange={(e) => setDisplayHandle(e.target.value)}
+                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-300">Music Player Song Title</label>
+                  <input 
+                    type="text" 
+                    value={songTitle} 
+                    onChange={(e) => setSongTitle(e.target.value)}
+                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-300">Music Player Artist</label>
+                  <input 
+                    type="text" 
+                    value={songArtist} 
+                    onChange={(e) => setSongArtist(e.target.value)}
+                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-[#232838] pt-3 space-y-3">
+                <h4 className="text-xs font-bold text-pink-400 uppercase tracking-wider">TikTok Widget</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="TikTok Name" 
+                    value={tiktokName} 
+                    onChange={(e) => setTiktokName(e.target.value)}
+                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="TikTok Handle" 
+                    value={tiktokHandle} 
+                    onChange={(e) => setTiktokHandle(e.target.value)}
+                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="TikTok Profile URL" 
+                  value={tiktokUrl} 
+                  onChange={(e) => setTiktokUrl(e.target.value)}
+                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                />
+                <div className="grid grid-cols-3 gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="Following" 
+                    value={tiktokFollowing} 
+                    onChange={(e) => setTiktokFollowing(e.target.value)}
+                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white text-center"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Followers" 
+                    value={tiktokFollowers} 
+                    onChange={(e) => setTiktokFollowers(e.target.value)}
+                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white text-center"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Likes" 
+                    value={tiktokLikes} 
+                    onChange={(e) => setTiktokLikes(e.target.value)}
+                    className="bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white text-center"
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-[#232838] pt-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gray-300 uppercase tracking-wider">Connections</h4>
+                  <button 
+                    onClick={() => setConnections([...connections, { id: Date.now().toString(), platform: "New", handle: "@user", url: "" }])}
+                    className="px-2 py-1 bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add
+                  </button>
+                </div>
+                {connections.map((conn, idx) => (
+                  <div key={conn.id} className="flex items-center gap-2 bg-[#141720] p-2 rounded-xl border border-[#232838]">
+                    <input 
+                      type="text" 
+                      value={conn.platform}
+                      onChange={(e) => {
+                        const updated = [...connections];
+                        updated[idx].platform = e.target.value;
+                        setConnections(updated);
+                      }}
+                      className="w-1/3 bg-[#0f1117] border border-[#232838] rounded-lg px-2 py-1 text-xs text-white"
+                      placeholder="Platform"
+                    />
+                    <input 
+                      type="text" 
+                      value={conn.handle}
+                      onChange={(e) => {
+                        const updated = [...connections];
+                        updated[idx].handle = e.target.value;
+                        setConnections(updated);
+                      }}
+                      className="flex-1 bg-[#0f1117] border border-[#232838] rounded-lg px-2 py-1 text-xs text-white"
+                      placeholder="Handle"
+                    />
+                    <button 
+                      onClick={() => setConnections(connections.filter(c => c.id !== conn.id))}
+                      className="p-1 text-red-400 hover:text-red-300 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              onClick={saveAdminChanges}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 shadow-lg transition"
+            >
+              <Save className="w-4 h-4" /> Save & Publish Changes
+            </button>
           </div>
         </div>
       )}
@@ -383,8 +591,8 @@ export default function ProfilePage() {
               />
             </div>
 
-            <h1 className="text-2xl font-bold mt-2 tracking-wide text-white">suva.</h1>
-            <p className="text-xs text-gray-400 font-medium">@soxsuvaa • she/her</p>
+            <h1 className="text-2xl font-bold mt-2 tracking-wide text-white">{displayName}</h1>
+            <p className="text-xs text-gray-400 font-medium">{displayHandle}</p>
 
             <div className="flex items-center gap-2 mt-3">
               <span className="px-2.5 py-0.5 text-xs font-semibold bg-[#171a24] border border-[#262c3d] rounded-full flex items-center gap-1 text-amber-400 shadow-sm">
@@ -460,8 +668,8 @@ export default function ProfilePage() {
                     className="w-12 h-12 rounded-xl object-cover shadow-md flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white truncate leading-snug">misery</h3>
-                    <p className="text-xs text-gray-400 truncate">pupsies</p>
+                    <h3 className="text-sm font-bold text-white truncate leading-snug">{songTitle}</h3>
+                    <p className="text-xs text-gray-400 truncate">{songArtist}</p>
                   </div>
                 </div>
 
@@ -502,7 +710,7 @@ export default function ProfilePage() {
                 <button 
                   onClick={() => {
                     const nextLikedState = !liked;
-                    const nextCount = nextLikedState ? likeCount + 1 : likeCount - 1;
+                    const nextCount = nextLikedState ? likeCount + 1 : Math.max(0, likeCount - 1);
                     setLiked(nextLikedState);
                     setLikeCount(nextCount);
                     localStorage.setItem("profile_liked", String(nextLikedState));
@@ -525,7 +733,7 @@ export default function ProfilePage() {
 
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-pink-500/30 rounded-3xl p-4 shadow-lg relative overflow-hidden">
           <a 
-            href="https://www.tiktok.com/@not.p1nk" 
+            href={tiktokUrl} 
             target="_blank" 
             rel="noopener noreferrer"
             className="flex items-center justify-between p-2 rounded-2xl hover:bg-[#161922] transition"
@@ -534,7 +742,7 @@ export default function ProfilePage() {
               <img src="/tiktok.png" alt="TikTok" className="w-10 h-10 object-contain" />
               <div>
                 <span className="text-[10px] font-bold tracking-wider text-pink-400 uppercase block">TikTok</span>
-                <span className="text-sm font-bold text-white">P1NKK <span className="text-xs text-gray-400 font-normal">@not.p1nk</span></span>
+                <span className="text-sm font-bold text-white">{tiktokName} <span className="text-xs text-gray-400 font-normal">{tiktokHandle}</span></span>
               </div>
             </div>
             <ExternalLink className="w-4 h-4 text-gray-400" />
@@ -542,15 +750,15 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-3 gap-2 mt-3 text-center">
             <div className="bg-[#141720] p-2.5 rounded-xl border border-[#232838]">
-              <div className="text-xs font-bold text-white">19</div>
+              <div className="text-xs font-bold text-white">{tiktokFollowing}</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Following</div>
             </div>
             <div className="bg-[#141720] p-2.5 rounded-xl border border-[#232838]">
-              <div className="text-xs font-bold text-white">385</div>
+              <div className="text-xs font-bold text-white">{tiktokFollowers}</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Followers</div>
             </div>
             <div className="bg-[#141720] p-2.5 rounded-xl border border-[#232838]">
-              <div className="text-xs font-bold text-white">2.5K</div>
+              <div className="text-xs font-bold text-white">{tiktokLikes}</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Likes</div>
             </div>
           </div>
@@ -559,32 +767,28 @@ export default function ProfilePage() {
         <div className="bg-[#0f1117]/90 backdrop-blur-md border border-[#1f2430] rounded-3xl p-5 space-y-3 shadow-xl">
           <h2 className="text-sm font-bold text-gray-300 tracking-wide px-1">Connections</h2>
 
-          <a 
-            href="https://www.roblox.com/users/2807349866/profile" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center justify-between bg-[#141720] hover:bg-[#1c212e] border border-[#232838] p-3 rounded-2xl transition group"
-          >
-            <div className="flex items-center gap-3">
-              <img src="/roblox.png" alt="Roblox" className="w-7 h-7 object-contain" />
-              <span className="text-xs font-semibold text-gray-200">serdemsivridagg</span>
-            </div>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition" />
-          </a>
-
-          <div className="flex items-center justify-between bg-[#141720] border border-[#232838] p-3 rounded-2xl">
-            <div className="flex items-center gap-3">
-              <img src="/spotify.png" alt="Spotify" className="w-7 h-7 object-contain" />
-              <span className="text-xs font-semibold text-gray-200">soxsuva</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between bg-[#141720] border border-[#232838] p-3 rounded-2xl">
-            <div className="flex items-center gap-3">
-              <img src="/xbox.png" alt="Xbox" className="w-7 h-7 object-contain" />
-              <span className="text-xs font-semibold text-gray-200">soxsuva</span>
-            </div>
-          </div>
+          {connections.map((conn) => (
+            conn.url ? (
+              <a 
+                key={conn.id}
+                href={conn.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-between bg-[#141720] hover:bg-[#1c212e] border border-[#232838] p-3 rounded-2xl transition group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-gray-200">{conn.platform}: {conn.handle}</span>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition" />
+              </a>
+            ) : (
+              <div key={conn.id} className="flex items-center justify-between bg-[#141720] border border-[#232838] p-3 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-gray-200">{conn.platform}: {conn.handle}</span>
+                </div>
+              </div>
+            )
+          ))}
         </div>
       </div>
     </main>
