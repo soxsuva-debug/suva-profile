@@ -12,7 +12,8 @@ import {
   Lock,
   Eye,
   Settings,
-  Save
+  Save,
+  Upload
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
@@ -23,6 +24,7 @@ interface ConnectionItem {
   platform: string;
   handle: string;
   url: string;
+  icon?: string;
 }
 
 export default function ProfilePage() {
@@ -49,9 +51,9 @@ export default function ProfilePage() {
   const [songArtist, setSongArtist] = useState("pupsies");
 
   const connections: ConnectionItem[] = [
-    { id: "1", platform: "Roblox", handle: "serdemsivridagg", url: "https://www.roblox.com/users/2807349866/profile" },
-    { id: "2", platform: "Spotify", handle: "soxsuva", url: "" },
-    { id: "3", platform: "Xbox", handle: "soxsuva", url: "" }
+    { id: "1", platform: "Roblox", handle: "serdemsivridagg", url: "https://www.roblox.com/users/2807349866/profile", icon: "/roblox.png" },
+    { id: "2", platform: "Spotify", handle: "soxsuva", url: "", icon: "/spotify.png" },
+    { id: "3", platform: "Xbox", handle: "soxsuva", url: "", icon: "/xbox.png" }
   ];
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -82,6 +84,18 @@ export default function ProfilePage() {
     localStorage.setItem("cfg_songArtist", songArtist);
     alert("Changes saved and published successfully!");
     setIsAdminDashboardOpen(false);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      if (uploadEvent.target?.result) {
+        setter(uploadEvent.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleEnter = () => {
@@ -379,36 +393,57 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-300">Avatar (PFP) URL/Path</label>
-                <input 
-                  type="text" 
-                  value={avatarUrl} 
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                />
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-300">Avatar (PFP) Photo from Phone</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={avatarUrl} 
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                    placeholder="Image URL or pick file ->"
+                  />
+                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
+                    <Upload className="w-3.5 h-3.5" /> Pick File
+                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, setAvatarUrl)} className="hidden" />
+                  </label>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-300">Banner URL/Path</label>
-                <input 
-                  type="text" 
-                  value={bannerUrl} 
-                  onChange={(e) => setBannerUrl(e.target.value)}
-                  className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                />
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-300">Banner Photo / GIF from Phone</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={bannerUrl} 
+                    onChange={(e) => setBannerUrl(e.target.value)}
+                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                    placeholder="Banner URL or pick file ->"
+                  />
+                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
+                    <Upload className="w-3.5 h-3.5" /> Pick File
+                    <input type="file" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, setBannerUrl)} className="hidden" />
+                  </label>
+                </div>
               </div>
 
               <div className="border-t border-[#232838] pt-3 space-y-3">
                 <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Music Player Customization</h4>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-300">Audio File URL/Path (.mp3)</label>
-                  <input 
-                    type="text" 
-                    value={songUrl} 
-                    onChange={(e) => setSongUrl(e.target.value)}
-                    className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                  />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-300">Audio File (.mp3) from Phone</label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      value={songUrl} 
+                      onChange={(e) => setSongUrl(e.target.value)}
+                      className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
+                      placeholder="Audio URL or pick file ->"
+                    />
+                    <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
+                      <Upload className="w-3.5 h-3.5" /> Pick Audio
+                      <input type="file" accept="audio/*" onChange={(e) => handleFileUpload(e, setSongUrl)} className="hidden" />
+                    </label>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
@@ -672,6 +707,14 @@ export default function ProfilePage() {
                 className="flex items-center justify-between bg-[#141720] hover:bg-[#1c212e] border border-[#232838] p-3 rounded-2xl transition group"
               >
                 <div className="flex items-center gap-3">
+                  {conn.icon && (
+                    <img 
+                      src={conn.icon} 
+                      alt={conn.platform} 
+                      className="w-5 h-5 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  )}
                   <span className="text-xs font-semibold text-gray-200">{conn.platform}: {conn.handle}</span>
                 </div>
                 <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition" />
@@ -679,6 +722,14 @@ export default function ProfilePage() {
             ) : (
               <div key={conn.id} className="flex items-center justify-between bg-[#141720] border border-[#232838] p-3 rounded-2xl">
                 <div className="flex items-center gap-3">
+                  {conn.icon && (
+                    <img 
+                      src={conn.icon} 
+                      alt={conn.platform} 
+                      className="w-5 h-5 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  )}
                   <span className="text-xs font-semibold text-gray-200">{conn.platform}: {conn.handle}</span>
                 </div>
               </div>
