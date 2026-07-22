@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Play, Pause, Heart, Eye, Volume2, VolumeX, 
-  RotateCcw, ShieldCheck, Code, Sparkles, Check, X, Gamepad2, Disc, Lock, UserKey
+  RotateCcw, ShieldCheck, Code, Sparkles, Check, X, Gamepad2, Disc, Lock, KeyRound
 } from "lucide-react";
 
 export default function ProfilePage() {
