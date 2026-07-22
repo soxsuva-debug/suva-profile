@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState, useRef } from "react";
 import { 
   Play, 
@@ -13,31 +15,7 @@ import {
 
 const DISCORD_USER_ID = "1491533148914450614";
 
-export const metadata = {
-  title: "suva.",
-  description: "welcome to my site",
-  openGraph: {
-    title: "suva.",
-    description: "welcome to my site",
-    images: [
-      {
-        url: "/banner.gif",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "suva.",
-    description: "welcome to my site",
-    images: ["/banner.gif"],
-  },
-};
-
 export default function ProfilePage() {
-  return <ProfileContent />;
-}
-
-function ProfileContent() {
   const [hasEntered, setHasEntered] = useState(false);
   const [isFading, setIsFading] = useState(false);
   const [lanyardData, setLanyardData] = useState<any>(null);
