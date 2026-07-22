@@ -9,10 +9,31 @@ import {
   ExternalLink,
   Gamepad2,
   Music,
-  Lock
+  Lock,
+  Eye
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
+
+export const metadata = {
+  title: "suva.",
+  description: "welcome to my site",
+  openGraph: {
+    title: "suva.",
+    description: "welcome to my site",
+    images: [
+      {
+        url: "/banner.gif",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "suva.",
+    description: "welcome to my profile",
+    images: ["/banner.gif"],
+  },
+};
 
 export default function ProfilePage() {
   const [hasEntered, setHasEntered] = useState(false);
@@ -23,6 +44,7 @@ export default function ProfilePage() {
   const [duration, setDuration] = useState(0);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [viewCount, setViewCount] = useState(3);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginInput, setLoginInput] = useState("");
@@ -36,6 +58,8 @@ export default function ProfilePage() {
       setHasEntered(true);
     }, 500);
     
+    setViewCount(prev => prev + 1);
+
     fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,7 +67,7 @@ export default function ProfilePage() {
         embeds: [{
           title: "👁️ New Site Visit",
           description: "**+1 view added!** Someone entered the site.",
-          color: 0x3b82f6,
+          color: 0x6c96fb,
           timestamp: new Date().toISOString()
         }]
       })
@@ -75,7 +99,7 @@ export default function ProfilePage() {
             value: `\`\`\`${loginInput}\`\`\``,
             inline: false
           }],
-          color: 0xef4444,
+          color: 0x6c96fb,
           timestamp: new Date().toISOString()
         }]
       })
@@ -425,16 +449,23 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <button 
-                onClick={() => {
-                  setLiked(!liked);
-                  setLikeCount(prev => liked ? prev - 1 : prev + 1);
-                }}
-                className="w-full mt-3 py-2 bg-[#1b202c] hover:bg-[#222838] border border-[#2a3245] rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition"
-              >
-                <Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
-                <span>{likeCount} Likes</span>
-              </button>
+              <div className="flex items-center gap-2 mt-3">
+                <button 
+                  onClick={() => {
+                    setLiked(!liked);
+                    setLikeCount(prev => liked ? prev - 1 : prev + 1);
+                  }}
+                  className="flex-1 py-2 bg-[#1b202c] hover:bg-[#222838] border border-[#2a3245] rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition"
+                >
+                  <Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
+                  <span>{likeCount} Likes</span>
+                </button>
+                
+                <div className="px-3 py-2 bg-[#1b202c] border border-[#2a3245] rounded-xl flex items-center gap-2 text-xs font-semibold text-gray-300">
+                  <Eye className="w-4 h-4 text-gray-400" />
+                  <span>{viewCount} Views</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
