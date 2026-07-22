@@ -40,8 +40,8 @@ export default function ProfilePage() {
     bannerUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
     songTitle: "90mph",
     artistName: "JBEE",
-    songUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    albumCoverUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&auto=format&fit=crop&q=80"
+    songUrl: "/pupsies-misery.mp3",
+    albumCoverUrl: "/misery.jpg"
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -456,7 +456,7 @@ export default function ProfilePage() {
                 /* Login Form */
                 <form onSubmit={handleLogin} className="space-y-4 py-2">
                   <div className="flex items-center gap-2 text-rose-400 font-bold text-lg mb-1">
-                    <UserKey size={20} /> Owner Admin Access
+                    <KeyRound size={20} /> Owner Admin Access
                   </div>
                   <p className="text-xs text-zinc-400">
                     Sign in to modify live site settings.
