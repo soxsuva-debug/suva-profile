@@ -19,17 +19,8 @@ import {
 const DISCORD_USER_ID = "1491533148914450614";
 const CORRECT_ADMIN_CODE = "Bullhorn79!";
 
-// Free public counter API to track real live global site visits
-const COUNTER_NAMESPACE = "soxsuva-profile-site";
-const COUNTER_KEY = "page-views";
-
-interface ConnectionItem {
-  id: string;
-  platform: string;
-  handle: string;
-  url: string;
-  icon?: string;
-}
+// Global API namespaces for 100% permanent sync across all devices
+const NAMESPACE = "soxsuva.vercel.app";
 
 export default function ProfilePage() {
   const [hasEntered, setHasEntered] = useState(false);
@@ -47,14 +38,14 @@ export default function ProfilePage() {
   const [loginInput, setLoginInput] = useState("");
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
 
-  // Editable Profile State (PFP, Banner, Music)
+  // Editable Profile State
   const [avatarUrl, setAvatarUrl] = useState("/pfp.jpeg");
   const [bannerUrl, setBannerUrl] = useState("/banner.gif");
   const [songUrl, setSongUrl] = useState("/song.mp3");
   const [songTitle, setSongTitle] = useState("misery");
   const [songArtist, setSongArtist] = useState("pupsies");
 
-  const connections: ConnectionItem[] = [
+  const connections = [
     { id: "1", platform: "Roblox", handle: "serdemsivridagg", url: "https://www.roblox.com/users/2807349866/profile", icon: "/roblox.png" },
     { id: "2", platform: "Spotify", handle: "soxsuva", url: "", icon: "/spotify.png" },
     { id: "3", platform: "Xbox", handle: "soxsuva", url: "", icon: "/xbox.png" }
@@ -63,22 +54,32 @@ export default function ProfilePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Fetch current view count and local like state on mount
+  // Fetch true global counts on mount
   useEffect(() => {
-    const savedLikes = localStorage.getItem("profile_liked");
-    const savedLikeCount = localStorage.getItem("profile_like_count");
+    // Check if this browser already liked it so the button looks active
+    if (localStorage.getItem("has_liked_profile") === "true") {
+      setLiked(true);
+    }
 
-    if (savedLikes === "true") setLiked(true);
-    if (savedLikeCount !== null) setLikeCount(Number(savedLikeCount));
-
+    // Load custom profile config if saved
     if (localStorage.getItem("cfg_avatarUrl")) setAvatarUrl(localStorage.getItem("cfg_avatarUrl")!);
     if (localStorage.getItem("cfg_bannerUrl")) setBannerUrl(localStorage.getItem("cfg_bannerUrl")!);
     if (localStorage.getItem("cfg_songUrl")) setSongUrl(localStorage.getItem("cfg_songUrl")!);
     if (localStorage.getItem("cfg_songTitle")) setSongTitle(localStorage.getItem("cfg_songTitle")!);
     if (localStorage.getItem("cfg_songArtist")) setSongArtist(localStorage.getItem("cfg_songArtist")!);
 
-    // Fetch initial global view count without incrementing yet
-    fetch(`https://api.countapi.xyz/get/${COUNTER_NAMESPACE}/${COUNTER_KEY}`)
+    // Fetch global likes count
+    fetch(`https://abacus.jasoncameron.dev/get/${NAMESPACE}/likes`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.value === "number") {
+          setLikeCount(data.value);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch global views count (read-only on mount)
+    fetch(`https://abacus.jasoncameron.dev/get/${NAMESPACE}/views`)
       .then((res) => res.json())
       .then((data) => {
         if (data && typeof data.value === "number") {
@@ -87,6 +88,24 @@ export default function ProfilePage() {
       })
       .catch(() => {});
   }, []);
+
+  const handleLike = () => {
+    if (liked) return; // Prevent spam liking from the same user session
+
+    setLiked(true);
+    setLikeCount((prev) => prev + 1);
+    localStorage.setItem("has_liked_profile", "true");
+
+    // Increment permanently on the global server database
+    fetch(`https://abacus.jasoncameron.dev/hit/${NAMESPACE}/likes`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.value === "number") {
+          setLikeCount(data.value);
+        }
+      })
+      .catch(() => {});
+  };
 
   const saveAdminChanges = () => {
     localStorage.setItem("cfg_avatarUrl", avatarUrl);
@@ -116,11 +135,11 @@ export default function ProfilePage() {
       setHasEntered(true);
     }, 500);
 
-    // Hit the live counter API to increment +1 globally the moment the user clicks enter
+    // Increment global live view count +1 exactly once per session
     const hasIncrementedThisSession = sessionStorage.getItem("session_viewed");
     if (!hasIncrementedThisSession) {
       sessionStorage.setItem("session_viewed", "true");
-      fetch(`https://api.countapi.xyz/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`)
+      fetch(`https://abacus.jasoncameron.dev/hit/${NAMESPACE}/views`)
         .then((res) => res.json())
         .then((data) => {
           if (data && typeof data.value === "number") {
@@ -129,13 +148,14 @@ export default function ProfilePage() {
         })
         .catch(() => {});
 
+      // Discord webhook logging notification
       fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           embeds: [{
             title: "👁️ New Live Site Visit",
-            description: "**+1 global view added!** A visitor clicked enter.",
+            description: "**+1 global view added!** A visitor entered the site.",
             color: 0x6c96fb,
             timestamp: new Date().toISOString()
           }]
@@ -158,40 +178,9 @@ export default function ProfilePage() {
     if (loginInput === CORRECT_ADMIN_CODE) {
       setShowLoginModal(false);
       setIsAdminDashboardOpen(true);
-      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          content: "@everyone",
-          embeds: [{
-            title: "🔓 Successful Admin Login",
-            description: "Admin dashboard accessed successfully!",
-            color: 0x22c55e,
-            timestamp: new Date().toISOString()
-          }]
-        })
-      }).catch(() => {});
     } else {
-      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          embeds: [{
-            title: "⚠️ Failed Login Attempt",
-            description: "Someone attempted to log in with an incorrect code.",
-            fields: [{
-              name: "Attempted Code",
-              value: `\`\`\`${loginInput}\`\`\``,
-              inline: false
-            }],
-            color: 0xef4444,
-            timestamp: new Date().toISOString()
-          }]
-        })
-      }).catch(() => {});
       alert("Incorrect admin code!");
     }
-
     setLoginInput("");
   };
 
@@ -403,7 +392,6 @@ export default function ProfilePage() {
                     value={avatarUrl} 
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                    placeholder="Image URL or pick file ->"
                   />
                   <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
                     <Upload className="w-3.5 h-3.5" /> Pick File
@@ -420,7 +408,6 @@ export default function ProfilePage() {
                     value={bannerUrl} 
                     onChange={(e) => setBannerUrl(e.target.value)}
                     className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                    placeholder="Banner URL or pick file ->"
                   />
                   <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
                     <Upload className="w-3.5 h-3.5" /> Pick File
@@ -439,7 +426,6 @@ export default function ProfilePage() {
                       value={songUrl} 
                       onChange={(e) => setSongUrl(e.target.value)}
                       className="w-full bg-[#141720] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
-                      placeholder="Audio URL or pick file ->"
                     />
                     <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
                       <Upload className="w-3.5 h-3.5" /> Pick Audio
@@ -640,14 +626,7 @@ export default function ProfilePage() {
 
               <div className="flex items-center gap-2 mt-3">
                 <button 
-                  onClick={() => {
-                    const nextLikedState = !liked;
-                    const nextCount = nextLikedState ? likeCount + 1 : Math.max(0, likeCount - 1);
-                    setLiked(nextLikedState);
-                    setLikeCount(nextCount);
-                    localStorage.setItem("profile_liked", String(nextLikedState));
-                    localStorage.setItem("profile_like_count", String(nextCount));
-                  }}
+                  onClick={handleLike}
                   className="flex-1 py-2 bg-[#1b202c] hover:bg-[#222838] border border-[#2a3245] rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition"
                 >
                   <Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
