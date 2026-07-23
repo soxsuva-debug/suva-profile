@@ -19,6 +19,10 @@ import {
 const DISCORD_USER_ID = "1491533148914450614";
 const CORRECT_ADMIN_CODE = "Bullhorn79!";
 
+// Free public counter API to track real live global site visits
+const COUNTER_NAMESPACE = "soxsuva-profile-site";
+const COUNTER_KEY = "page-views";
+
 interface ConnectionItem {
   id: string;
   platform: string;
@@ -59,21 +63,29 @@ export default function ProfilePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Load saved custom data and stats from localStorage
+  // Fetch current view count and local like state on mount
   useEffect(() => {
     const savedLikes = localStorage.getItem("profile_liked");
     const savedLikeCount = localStorage.getItem("profile_like_count");
-    const savedViews = localStorage.getItem("profile_view_count");
 
     if (savedLikes === "true") setLiked(true);
     if (savedLikeCount !== null) setLikeCount(Number(savedLikeCount));
-    if (savedViews !== null) setViewCount(Number(savedViews));
 
     if (localStorage.getItem("cfg_avatarUrl")) setAvatarUrl(localStorage.getItem("cfg_avatarUrl")!);
     if (localStorage.getItem("cfg_bannerUrl")) setBannerUrl(localStorage.getItem("cfg_bannerUrl")!);
     if (localStorage.getItem("cfg_songUrl")) setSongUrl(localStorage.getItem("cfg_songUrl")!);
     if (localStorage.getItem("cfg_songTitle")) setSongTitle(localStorage.getItem("cfg_songTitle")!);
     if (localStorage.getItem("cfg_songArtist")) setSongArtist(localStorage.getItem("cfg_songArtist")!);
+
+    // Fetch initial global view count without incrementing yet
+    fetch(`https://api.countapi.xyz/get/${COUNTER_NAMESPACE}/${COUNTER_KEY}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.value === "number") {
+          setViewCount(data.value);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const saveAdminChanges = () => {
@@ -104,36 +116,27 @@ export default function ProfilePage() {
       setHasEntered(true);
     }, 500);
 
-    const hasVisitedBefore = localStorage.getItem("profile_visited");
-    let currentViews = viewCount;
-
-    if (!hasVisitedBefore) {
-      localStorage.setItem("profile_visited", "true");
-      currentViews += 1;
-      setViewCount(currentViews);
-      localStorage.setItem("profile_view_count", String(currentViews));
-
-      fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          embeds: [{
-            title: "👁️ New Site Visit",
-            description: "**+1 view added!** A new user entered the site.",
-            color: 0x6c96fb,
-            timestamp: new Date().toISOString()
-          }]
+    // Hit the live counter API to increment +1 globally the moment the user clicks enter
+    const hasIncrementedThisSession = sessionStorage.getItem("session_viewed");
+    if (!hasIncrementedThisSession) {
+      sessionStorage.setItem("session_viewed", "true");
+      fetch(`https://api.countapi.xyz/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && typeof data.value === "number") {
+            setViewCount(data.value);
+          }
         })
-      }).catch(() => {});
-    } else {
+        .catch(() => {});
+
       fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           embeds: [{
-            title: "🔄 Returning User Visit",
-            description: "A returning user has entered the site.",
-            color: 0x34d399,
+            title: "👁️ New Live Site Visit",
+            description: "**+1 global view added!** A visitor clicked enter.",
+            color: 0x6c96fb,
             timestamp: new Date().toISOString()
           }]
         })
@@ -141,11 +144,10 @@ export default function ProfilePage() {
     }
 
     if (audioRef.current) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((err) => {
+      audioRef.current.play().catch((err) => {
         console.error(err);
       });
+      setIsPlaying(true);
     }
   };
 
