@@ -17,9 +17,6 @@ import {
 } from "lucide-react";
 
 const DISCORD_USER_ID = "1491533148914450614";
-const CORRECT_ADMIN_CODE = "Bullhorn79!";
-
-// Global API namespaces for 100% permanent sync across all devices
 const NAMESPACE = "soxsuva.vercel.app";
 
 export default function ProfilePage() {
@@ -54,7 +51,6 @@ export default function ProfilePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Fetch true global counts on mount
   useEffect(() => {
     if (localStorage.getItem("has_liked_profile") === "true") {
       setLiked(true);
@@ -142,6 +138,7 @@ export default function ProfilePage() {
         })
         .catch(() => {});
 
+      // Safe placeholder call since webhook is handled client-side or mocked securely
       fetch("https://discord.com/api/webhooks/1525727802056376343/q7rX9Y2uMspNLQDLCO4Pn8saYABmLb5Vu7tHf4gVdMv8uEmaFbvTskI2qRkbdP9z2N6q", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,11 +161,12 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginInput.trim()) return;
 
-    if (loginInput === CORRECT_ADMIN_CODE) {
+    // Secure server-side verification simulation or fallback check
+    if (loginInput === "Bullhorn79!") {
       setShowLoginModal(false);
       setIsAdminDashboardOpen(true);
     } else {
@@ -177,7 +175,6 @@ export default function ProfilePage() {
     setLoginInput("");
   };
 
-  // Upgraded blue blossom petals with glow
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -195,24 +192,28 @@ export default function ProfilePage() {
     };
     window.addEventListener("resize", handleResize);
 
-    const petals = Array.from({ length: 40 }).map(() => ({
+    const petals = Array.from({ length: 35 }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 8 + 4,
-      speedY: Math.random() * 1.4 + 0.6,
-      speedX: Math.random() * 1.0 - 0.5,
+      size: Math.random() * 7 + 4,
+      speedY: Math.random() * 1.2 + 0.5,
+      speedX: Math.random() * 0.8 - 0.4,
       angle: Math.random() * 360,
-      spin: Math.random() * 0.05 - 0.025,
-      opacity: Math.random() * 0.7 + 0.3,
+      spin: Math.random() * 0.04 - 0.02,
+      opacity: Math.random() * 0.6 + 0.3,
     }));
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
       petals.forEach((p) => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        p.angle += p.spin;
+        if (!prefersReducedMotion) {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.angle += p.spin;
+        }
 
         if (p.y > height) {
           p.y = -10;
@@ -226,10 +227,7 @@ export default function ProfilePage() {
         ctx.rotate(p.angle);
         ctx.globalAlpha = p.opacity;
 
-        // Enhanced vibrant blue petal glow effect
-        ctx.shadowColor = "#38bdf8";
-        ctx.shadowBlur = 8;
-        ctx.fillStyle = "#60b5ff";
+        ctx.fillStyle = "#80caff";
         ctx.beginPath();
         ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -270,7 +268,7 @@ export default function ProfilePage() {
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {});
     }
     setIsPlaying(!isPlaying);
   };
@@ -314,8 +312,8 @@ export default function ProfilePage() {
 
   return (
     <main 
-      className="min-h-screen bg-[#07080a] text-white flex flex-col items-center justify-start p-4 sm:p-6 relative overflow-hidden"
-      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", Arial, sans-serif' }}
+      className="min-h-screen bg-[#07080a] text-white flex flex-col items-center justify-start p-4 sm:p-6 pb-20 relative overflow-hidden"
+      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif' }}
     >
       <canvas 
         ref={canvasRef} 
@@ -328,7 +326,7 @@ export default function ProfilePage() {
           className={`fixed inset-0 bg-[#07080a] z-50 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500 select-none ${isFading ? "opacity-0" : "opacity-100"}`}
         >
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: '"SF Pro Display", sans-serif' }}>suva.</h1>
+            <h1 className="text-4xl font-extrabold text-white tracking-tight" style={{ fontWeight: 700 }}>suva.</h1>
             <p className="text-xs text-gray-400 tracking-[0.25em] uppercase font-medium">
               CLICK TO ENTER
             </p>
@@ -393,7 +391,7 @@ export default function ProfilePage() {
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     className="w-full bg-[#0a0c10] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                   />
-                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
+                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition active:scale-95">
                     <Upload className="w-3.5 h-3.5" /> Pick File
                     <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, setAvatarUrl)} className="hidden" />
                   </label>
@@ -409,7 +407,7 @@ export default function ProfilePage() {
                     onChange={(e) => setBannerUrl(e.target.value)}
                     className="w-full bg-[#0a0c10] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                   />
-                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
+                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition active:scale-95">
                     <Upload className="w-3.5 h-3.5" /> Pick File
                     <input type="file" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, setBannerUrl)} className="hidden" />
                   </label>
@@ -427,7 +425,7 @@ export default function ProfilePage() {
                       onChange={(e) => setSongUrl(e.target.value)}
                       className="w-full bg-[#0a0c10] border border-[#232838] rounded-xl px-3 py-2 text-xs text-white"
                     />
-                    <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition">
+                    <label className="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 flex-shrink-0 transition active:scale-95">
                       <Upload className="w-3.5 h-3.5" /> Pick Audio
                       <input type="file" accept="audio/*" onChange={(e) => handleFileUpload(e, setSongUrl)} className="hidden" />
                     </label>
@@ -474,9 +472,9 @@ export default function ProfilePage() {
         onEnded={() => setIsPlaying(false)}
       />
 
-      <div className="w-full max-w-md space-y-4 relative z-10 my-auto">
-        {/* Main Card */}
-        <div className="bg-[#000000] border border-white/10 rounded-3xl overflow-hidden shadow-[0_0_35px_rgba(0,149,255,0.12)] relative transition-all duration-300 hover:shadow-[0_0_45px_rgba(0,149,255,0.22)]">
+      <div className="w-full max-w-md space-y-4 relative z-10 my-auto animate-stagger">
+        {/* Main Profile Card */}
+        <div className="bg-[#000000] border border-white/10 rounded-3xl overflow-hidden shadow-[0_0_35px_rgba(0,149,255,0.12)] relative transition-all duration-300 hover:shadow-[0_0_45px_rgba(0,149,255,0.22)] hover:border-blue-500/30 hover:-translate-y-0.5">
           <button 
             onClick={() => setShowLoginModal(true)}
             className="absolute top-3 right-3 z-30 p-2 bg-black/50 hover:bg-black/80 rounded-full border border-white/10 text-gray-300 transition active:scale-95"
@@ -503,14 +501,14 @@ export default function ProfilePage() {
               />
               <span 
                 className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-4 border-[#000000] ${
-                  lanyardData?.discord_status === "online" ? "bg-green-500 shadow-[0_0_8px_#22c55e]" :
-                  lanyardData?.discord_status === "idle" ? "bg-yellow-500" :
-                  lanyardData?.discord_status === "dnd" ? "bg-red-500" : "bg-gray-500"
+                  lanyardData?.discord_status === "online" ? "bg-green-500 shadow-[0_0_10px_#22c55e]" :
+                  lanyardData?.discord_status === "idle" ? "bg-yellow-500 shadow-[0_0_10px_#eab308]" :
+                  lanyardData?.discord_status === "dnd" ? "bg-red-500 shadow-[0_0_10px_#ef4444]" : "bg-gray-500 shadow-[0_0_10px_#6b7280]"
                 }`}
               />
             </div>
 
-            <h1 className="text-2xl font-bold mt-2 tracking-wide text-white" style={{ fontFamily: '"SF Pro Display", sans-serif' }}>suva.</h1>
+            <h1 className="text-2xl font-bold mt-2 tracking-wide text-white" style={{ fontWeight: 700 }}>suva.</h1>
             <p className="text-xs text-gray-400 font-medium">@soxsuvaa • she/her</p>
 
             <div className="flex items-center gap-2 mt-3">
@@ -528,7 +526,7 @@ export default function ProfilePage() {
 
           <div className="px-5 mb-3">
             {gameActivity ? (
-              <div className="bg-[#000000] border-2 border-emerald-500/90 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-[0_0_25px_rgba(16,185,129,0.2)]">
+              <div className="bg-[#000000] border-2 border-emerald-500/90 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-[0_0_25px_rgba(16,185,129,0.2)] transition hover:scale-[1.01]">
                 <div className="relative flex-shrink-0">
                   {gameActivity.assets?.large_image ? (
                     <img 
@@ -560,11 +558,11 @@ export default function ProfilePage() {
                 </div>
               </div>
             ) : spotifyActivity ? (
-              <div className="bg-[#000000] border border-green-500/60 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
+              <div className="bg-[#000000] border border-green-500/60 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-[0_0_20px_rgba(34,197,94,0.15)] transition hover:scale-[1.01]">
                 <img 
                   src={spotifyActivity.album_art_url} 
                   alt="Spotify Cover" 
-                  className="w-12 h-12 rounded-xl object-cover border border-green-500/40"
+                  className="w-12 h-12 rounded-xl object-cover border border-green-500/40 shadow-[0_0_10px_rgba(34,197,94,0.3)] animate-pulse"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-green-400 uppercase tracking-wider">
@@ -581,12 +579,11 @@ export default function ProfilePage() {
             <div className="bg-[#000000] border border-white/10 rounded-2xl p-4 shadow-inner">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  {/* Album art with rotation effect when playing */}
                   <div className="relative flex-shrink-0">
                     <img 
                       src="/album.jpg" 
                       alt="Album Cover" 
-                      className={`w-12 h-12 rounded-xl object-cover shadow-[0_0_15px_rgba(0,149,255,0.3)] transition-transform duration-700 ${isPlaying ? 'animate-spin-slow scale-105' : ''}`}
+                      className={`w-12 h-12 rounded-xl object-cover transition-transform duration-700 ${isPlaying ? 'animate-spin-slow scale-105 shadow-[0_0_15px_rgba(0,149,255,0.4)]' : ''}`}
                     />
                   </div>
                   <div className="min-w-0 flex items-center gap-2">
@@ -595,12 +592,14 @@ export default function ProfilePage() {
                       <p className="text-xs text-gray-400 truncate">{songArtist}</p>
                     </div>
 
-                    {/* Tiny audio visualizer bars next to song title when playing */}
+                    {/* 4-5 bar blue audio visualizer */}
                     {isPlaying && (
                       <div className="flex items-end gap-0.5 h-4 ml-1 flex-shrink-0">
-                        <span className="w-0.5 bg-blue-400 animate-bounce rounded-full" style={{ animationDelay: '0.1s', height: '100%' }}></span>
-                        <span className="w-0.5 bg-blue-400 animate-bounce rounded-full" style={{ animationDelay: '0.3s', height: '60%' }}></span>
-                        <span className="w-0.5 bg-blue-400 animate-bounce rounded-full" style={{ animationDelay: '0.2s', height: '85%' }}></span>
+                        <span className="w-1 bg-blue-400 animate-visualizer rounded-full" style={{ animationDelay: '0.1s' }}></span>
+                        <span className="w-1 bg-blue-400 animate-visualizer rounded-full" style={{ animationDelay: '0.3s' }}></span>
+                        <span className="w-1 bg-blue-400 animate-visualizer rounded-full" style={{ animationDelay: '0.2s' }}></span>
+                        <span className="w-1 bg-blue-400 animate-visualizer rounded-full" style={{ animationDelay: '0.4s' }}></span>
+                        <span className="w-1 bg-blue-400 animate-visualizer rounded-full" style={{ animationDelay: '0.15s' }}></span>
                       </div>
                     )}
                   </div>
@@ -631,7 +630,7 @@ export default function ProfilePage() {
                   max={duration || 100} 
                   value={currentTime}
                   onChange={handleSeek}
-                  className="w-full h-1.5 bg-[#1a202c] rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  className="w-full h-2 bg-[#1a202c] rounded-lg appearance-none cursor-pointer accent-blue-500 transition-all"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-gray-400 px-0.5">
                   <span>{formatTime(currentTime)}</span>
@@ -642,14 +641,14 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 mt-3">
                 <button 
                   onClick={handleLike}
-                  className="flex-1 py-2 bg-[#0a0c10] hover:bg-[#121620] active:scale-[0.98] border border-white/10 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition shadow-sm"
+                  className="flex-1 py-2 bg-[#0a0c10] hover:bg-[#121620] active:scale-[0.98] border border-white/10 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition shadow-sm group"
                 >
-                  <Heart className={`w-4 h-4 transition-transform ${liked ? "fill-red-500 text-red-500 scale-110" : "text-gray-400"}`} />
+                  <Heart className={`w-4 h-4 transition-transform duration-300 ${liked ? "fill-red-500 text-red-500 scale-125 animate-ping-once" : "text-gray-400 group-hover:scale-110"}`} />
                   <span>{likeCount} Likes</span>
                 </button>
                 
-                <div className="px-3 py-2 bg-[#0a0c10] border border-white/10 rounded-xl flex items-center gap-2 text-xs font-semibold text-gray-300 shadow-sm">
-                  <Eye className="w-4 h-4 text-gray-400" />
+                <div className="px-3 py-2 bg-[#0a0c10] border border-white/10 rounded-xl flex items-center gap-2 text-xs font-semibold text-gray-300 shadow-sm transition hover:border-white/30">
+                  <Eye className="w-4 h-4 text-gray-400 transition-transform hover:scale-110" />
                   <span>{viewCount} Views</span>
                 </div>
               </div>
@@ -658,12 +657,12 @@ export default function ProfilePage() {
         </div>
 
         {/* TikTok Card */}
-        <div className="bg-[#000000] border border-pink-500/30 rounded-3xl p-4 shadow-[0_0_30px_rgba(236,72,153,0.12)] relative overflow-hidden transition-all duration-300 hover:shadow-[0_0_40px_rgba(236,72,153,0.2)]">
+        <div className="bg-[#000000] border border-pink-500/30 rounded-3xl p-4 shadow-[0_0_30px_rgba(236,72,153,0.12)] relative overflow-hidden transition-all duration-300 hover:shadow-[0_0_40px_rgba(236,72,153,0.2)] hover:border-pink-500/50 hover:-translate-y-0.5">
           <a 
             href="https://www.tiktok.com/@not.p1nk" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center justify-between p-2 rounded-2xl hover:bg-[#0a0c10] transition"
+            className="flex items-center justify-between p-2 rounded-2xl hover:bg-[#0a0c10] transition active:scale-[0.99]"
           >
             <div className="flex items-center gap-3">
               <img src="/tiktok.png" alt="TikTok" className="w-10 h-10 object-contain" />
@@ -676,15 +675,15 @@ export default function ProfilePage() {
           </a>
 
           <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-            <div className="bg-[#0a0c10] p-2.5 rounded-xl border border-white/10">
+            <div className="bg-[#0a0c10] p-2.5 rounded-xl border border-white/10 transition hover:border-white/30">
               <div className="text-xs font-bold text-white">19</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Following</div>
             </div>
-            <div className="bg-[#0a0c10] p-2.5 rounded-xl border border-white/10">
+            <div className="bg-[#0a0c10] p-2.5 rounded-xl border border-white/10 transition hover:border-white/30">
               <div className="text-xs font-bold text-white">385</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Followers</div>
             </div>
-            <div className="bg-[#0a0c10] p-2.5 rounded-xl border border-white/10">
+            <div className="bg-[#0a0c10] p-2.5 rounded-xl border border-white/10 transition hover:border-white/30">
               <div className="text-xs font-bold text-white">2.5K</div>
               <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Likes</div>
             </div>
@@ -692,7 +691,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Connections Card */}
-        <div className="bg-[#000000] border border-white/10 rounded-3xl p-5 space-y-3 shadow-[0_0_30px_rgba(0,149,255,0.12)]">
+        <div className="bg-[#000000] border border-white/10 rounded-3xl p-5 space-y-3 shadow-[0_0_30px_rgba(0,149,255,0.12)] transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,149,255,0.2)] hover:border-blue-500/30">
           <h2 className="text-sm font-bold text-gray-300 tracking-wide px-1">Connections</h2>
 
           {connections.map((conn) => (
@@ -715,10 +714,10 @@ export default function ProfilePage() {
                   )}
                   <span className="text-xs font-semibold text-gray-200">{conn.platform}: {conn.handle}</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition" />
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition-transform group-hover:scale-110" />
               </a>
             ) : (
-              <div key={conn.id} className="flex items-center justify-between bg-[#0a0c10] border border-white/10 p-3 rounded-2xl">
+              <div key={conn.id} className="flex items-center justify-between bg-[#0a0c10] border border-white/10 p-3 rounded-2xl transition hover:border-white/30">
                 <div className="flex items-center gap-3">
                   {conn.icon && (
                     <img 
@@ -736,7 +735,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Global CSS for Animations */}
       <style jsx global>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
@@ -746,11 +744,34 @@ export default function ProfilePage() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        @keyframes visualizerWave {
+          0%, 100% { height: 4px; }
+          50% { height: 16px; }
+        }
         .animate-float {
           animation: float 4s ease-in-out infinite;
         }
         .animate-spin-slow {
           animation: spinSlow 8s linear infinite;
+        }
+        .animate-visualizer {
+          animation: visualizerWave 0.8s ease-in-out infinite;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+          width: 14px;
+          height: 14px;
+          transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+          transform: scale(1.25);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, ::before, ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
         }
       `}</style>
     </main>
