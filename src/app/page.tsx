@@ -1,550 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>suva.</title>
-    <style>
-        :root {
-            --bg-color: #0b0c10;
-            --card-bg: rgba(18, 19, 26, 0.85);
-            --accent-color: #5865f2;
-            --text-main: #ffffff;
-            --text-sub: #b9bbbe;
-            --border-radius: 16px;
-            --petal-color: #60b5ff;
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+
+export default function Page() {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [bgColor, setBgColor] = useState('#0b0c10');
+    const [petalColor, setPetalColor] = useState('#60b5ff');
+
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    const toggleAudio = () => {
+        if (!audioRef.current) return;
+        if (audioRef.current.paused) {
+            audioRef.current.play();
+            setIsPlaying(true);
+        } else {
+            audioRef.current.pause();
+            setIsPlaying(false);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Animated Background Particles / Cherry Blossoms */
-        .bg-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #1a1c29 0%, var(--bg-color) 100%);
-            pointer-events: none;
-        }
-
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Profile Card Container */
-        .card {
-            width: 100%;
-            max-width: 420px;
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--border-radius);
-            backdrop-filter: blur(12px);
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            position: relative;
-        }
-
-        /* Banner Header */
-        .banner {
-            width: 100%;
-            height: 140px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
-        /* Avatar Section */
-        .avatar-container {
-            position: relative;
-            margin-top: -50px;
-            margin-left: 20px;
-            display: inline-block;
-        }
-
-        .avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 4px solid #12131a;
-            object-fit: cover;
-        }
-
-        .status-dot {
-            width: 16px;
-            height: 16px;
-            background-color: #23a55a;
-            border-radius: 50%;
-            border: 3px solid #12131a;
-            position: absolute;
-            bottom: 8px;
-            right: 4px;
-        }
-
-        /* Profile Details */
-        .profile-content {
-            padding: 15px 20px 20px 20px;
-        }
-
-        .username-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: #5865f2;
-            letter-spacing: -0.5px;
-        }
-
-        .handle-row {
-            font-size: 14px;
-            color: var(--text-sub);
-            margin-top: 2px;
-            margin-bottom: 12px;
-        }
-
-        .badges {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .badge {
-            background: rgba(255, 255, 255, 0.06);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #d1d5db;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* TikTok Card Widget */
-        .tiktok-card {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(236, 72, 153, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 16px;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            transition: border-color 0.2s;
-        }
-
-        .tiktok-card:hover {
-            border-color: rgba(236, 72, 153, 0.6);
-        }
-
-        .tiktok-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .tiktok-user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tiktok-icon {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-        }
-
-        .tiktok-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #ec4899;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tiktok-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            text-align: center;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 4px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .stat-value {
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        /* Custom Audio Player */
-        .player-card {
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-
-        .player-header {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #1db954;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .song-details {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .album-art {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .song-info {
-            flex-grow: 1;
-        }
-
-        .song-title {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .song-artist {
-            font-size: 13px;
-            color: var(--text-sub);
-        }
-
-        .play-btn {
-            background: #ffffff;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.1s ease;
-        }
-
-        .play-btn:active {
-            transform: scale(0.92);
-        }
-
-        /* Bio Box */
-        .bio-box {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 14px;
-            line-height: 1.4;
-            color: #e1e1e1;
-            margin-bottom: 16px;
-        }
-
-        .bio-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        /* Footer / Admin Trigger */
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            padding-top: 5px;
-            transition: color 0.2s;
-        }
-
-        .footer:hover {
-            color: var(--text-sub);
-        }
-
-        /* Admin Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-        }
-
-        .modal {
-            background: #12131a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            width: 90%;
-            max-width: 360px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-        }
-
-        .modal h3 {
-            margin-bottom: 16px;
-            font-size: 18px;
-            text-align: center;
-        }
-
-        .modal label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 10px 12px;
-            margin-bottom: 12px;
-            background: #0b0c10;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
-
-        .modal input[type="color"] {
-            padding: 4px;
-            height: 40px;
-            cursor: pointer;
-        }
-
-        .modal input:focus {
-            border-color: var(--accent-color);
-        }
-
-        .modal-btn {
-            width: 100%;
-            padding: 10px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 4px;
-        }
-
-        .admin-dashboard {
-            display: none;
-            text-align: left;
-        }
-
-        .admin-dashboard h4 {
-            color: #23a55a;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-
-    <canvas id="petalCanvas"></canvas>
-
-    <div class="card">
-        <!-- Banner Image -->
-        <div class="banner" style="background-image: url('IMG_9063.jpeg');"></div>
-
-        <!-- Avatar & Status -->
-        <div class="avatar-container">
-            <img src="357BDB9B-081D-4F65-AD1B-98837265B5E8.jpeg" alt="Profile" class="avatar">
-            <div class="status-dot"></div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="profile-content">
-            <div class="username-title">suva.</div>
-            <div class="handle-row">soxsuva</div>
-
-            <div class="badges">
-                <span class="badge">⚡ ZFC</span>
-                <span class="badge">✈️ Suva</span>
-                <span class="badge">👑 VIP</span>
-            </div>
-
-            <!-- TikTok Widget Updated to Match Source Image (186 Following, 690 Followers, 4,395 Likes) -->
-            <a href="https://www.tiktok.com/@not.p1nk" target="_blank" class="tiktok-card">
-                <div class="tiktok-header">
-                    <div class="tiktok-user-info">
-                        <svg class="tiktok-icon" viewBox="0 0 24 24" fill="#ec4899"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.33 6.33 0 0 0 10.86 4.47 6.32 6.32 0 0 0 1.81-4.47V9.16a8.16 8.16 0 0 0 4.97 1.83V7.52a4.81 4.81 0 0 1-1.05-.83z"/></svg>
-                        <span class="tiktok-title">TikTok @not.p1nk</span>
-                    </div>
-                    <span style="font-size: 12px; color: var(--text-sub);">↗</span>
-                </div>
-                <div class="tiktok-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">186</div>
-                        <div class="stat-label">Following</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value">690</div>
-                        <div class="stat-label">Followers</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value">4,395</div>
-                        <div class="stat-label">Likes</div>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Music Player -->
-            <div class="player-card">
-                <div class="player-header">
-                    <span>Listening to Audio</span>
-                </div>
-                <div class="song-details">
-                    <img src="IMG_9145.jpeg" alt="Album Cover" class="album-art">
-                    <div class="song-info">
-                        <div class="song-title">misery.</div>
-                        <div class="song-artist">pupsies</div>
-                    </div>
-                    <button class="play-btn" onclick="toggleAudio()">
-                        <span id="play-icon">▶</span>
-                    </button>
-                </div>
-                <audio id="audio-player" loop src="pupsies - misery. (Lyrics).mp3"></audio>
-            </div>
-
-            <!-- Bio Box -->
-            <div class="bio-box">
-                <div class="bio-title">Bio</div>
-                <div>welcome to suva.</div>
-            </div>
-
-            <div class="footer" onclick="openAdminModal()">
-                Created by suva.
-            </div>
-        </div>
-    </div>
-
-    <!-- Secure Admin Modal Panel -->
-    <div class="modal-overlay" id="adminModal">
-        <div class="modal">
-            <div id="login-form">
-                <h3>Admin Access</h3>
-                <input type="email" id="adminEmail" placeholder="Email">
-                <input type="password" id="adminPassword" placeholder="Password">
-                <button class="modal-btn" onclick="verifyAdmin()">Login</button>
-            </div>
-
-            <div id="admin-dashboard" class="admin-dashboard">
-                <h4>System Status: Secure</h4>
-                <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 12px;">Admin logged in as soxsuva@gmail.com</p>
-                
-                <label for="bgColorPicker">Background Color</label>
-                <input type="color" id="bgColorPicker" value="#0b0c10" oninput="updateBgColor(this.value)">
-
-                <label for="petalColorPicker" style="margin-top: 8px;">Cherry Blossom Color</label>
-                <input type="color" id="petalColorPicker" value="#60b5ff" oninput="updatePetalColor(this.value)">
-
-                <button class="modal-btn" style="background: #da373c; margin-top: 15px;" onclick="closeAdminModal()">Close Panel</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function toggleAudio() {
-            const player = document.getElementById('audio-player');
-            const icon = document.getElementById('play-icon');
-            if (player.paused) {
-                player.play();
-                icon.textContent = '❚❚';
-            } else {
-                player.pause();
-                icon.textContent = '▶';
-            }
-        }
-
-        function openAdminModal() {
-            document.getElementById('adminModal').style.display = 'flex';
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('admin-dashboard').style.display = 'none';
-            document.getElementById('adminEmail').value = '';
-            document.getElementById('adminPassword').value = '';
-        }
-
-        // Customization Functions
-        let customPetalColor = '#60b5ff';
-
-        function updateBgColor(color) {
-            document.documentElement.style.setProperty('--bg-color', color);
-        }
-
-        function updatePetalColor(color) {
-            customPetalColor = color;
-        }
-
-        // Canvas Cherry Blossom Animation Script
-        const canvas = document.getElementById('petalCanvas');
+    };
+
+    // Canvas Cherry Blossom Animation
+    useEffect(() => {
+        const canvas = document.getElementById('petalCanvas') as HTMLCanvasElement;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
 
-        window.addEventListener('resize', () => {
+        const handleResize = () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-        });
+        };
+        window.addEventListener('resize', handleResize);
 
         const petals = Array.from({ length: 35 }).map(() => ({
             x: Math.random() * width,
@@ -557,7 +51,8 @@
             opacity: Math.random() * 0.6 + 0.3,
         }));
 
-        function animatePetals() {
+        let animationFrameId: number;
+        const animatePetals = () => {
             ctx.clearRect(0, 0, width, height);
 
             petals.forEach((p) => {
@@ -577,52 +72,144 @@
                 ctx.rotate(p.angle);
                 ctx.globalAlpha = p.opacity;
 
-                ctx.fillStyle = customPetalColor;
+                ctx.fillStyle = petalColor;
                 ctx.beginPath();
                 ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             });
 
-            requestAnimationFrame(animatePetals);
-        }
+            animationFrameId = requestAnimationFrame(animatePetals);
+        };
         animatePetals();
 
-        // SHA-256 Hashing for Client-Side Security Verification
-        async function hashString(str) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [petalColor]);
+
+    const hashString = async (str: string) => {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    const verifyAdmin = async () => {
+        const targetEmailHash = "be3cf9b3f37bcf7b23395d8efd234c264b3ef1bd588fb7c81d86d5e1ef93bfbc"; 
+        const targetPassHash = "9d36440e0be2cb003b1e35bb3d1b802e8d350ecbc9219c6767eb27eb2bf0cdd3"; 
+
+        const inputEmailHash = await hashString(email.trim());
+        const inputPassHash = await hashString(password);
+
+        if (inputEmailHash === targetEmailHash && inputPassHash === targetPassHash) {
+            setLoggedIn(true);
+        } else {
+            alert('Invalid Credentials');
         }
+    };
 
-        async function verifyAdmin() {
-            const email = document.getElementById('adminEmail').value.trim();
-            const password = document.getElementById('adminPassword').value;
+    return (
+        <main style={{ backgroundColor: bgColor, color: '#ffffff', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', overflowX: 'hidden', position: 'relative' }}>
+            <canvas id="petalCanvas" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none' }}></canvas>
 
-            // Pre-calculated SHA-256 hashes for credentials
-            const targetEmailHash = "be3cf9b3f37bcf7b23395d8efd234c264b3ef1bd588fb7c81d86d5e1ef93bfbc"; // soxsuva@gmail.com
-            const targetPassHash = "9d36440e0be2cb003b1e35bb3d1b802e8d350ecbc9219c6767eb27eb2bf0cdd3"; // Bullhorn79!
+            <div className="card" style={{ width: '100%', maxWidth: '420px', background: 'rgba(18, 19, 26, 0.85)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)', position: 'relative' }}>
+                <div className="banner" style={{ width: '100%', height: '140px', backgroundImage: "url('/IMG_9063.jpeg')", backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}></div>
 
-            const inputEmailHash = await hashString(email);
-            const inputPassHash = await hashString(password);
+                <div className="avatar-container" style={{ position: 'relative', marginTop: '-50px', marginLeft: '20px', display: 'inline-block' }}>
+                    <img src="/357BDB9B-081D-4F65-AD1B-98837265B5E8.jpeg" alt="Profile" style={{ width: '90px', height: '90px', borderRadius: '50%', border: '4px solid #12131a', objectFit: 'cover' }} />
+                    <div style={{ width: '16px', height: '16px', backgroundColor: '#23a55a', borderRadius: '50%', border: '3px solid #12131a', position: 'absolute', bottom: '8px', right: '4px' }}></div>
+                </div>
 
-            if (inputEmailHash === targetEmailHash && inputPassHash === targetPassHash) {
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('admin-dashboard').style.display = 'block';
-            } else {
-                alert('Invalid Credentials');
-            }
-        }
+                <div style={{ padding: '15px 20px 20px 20px' }}>
+                    <div style={{ fontSize: '26px', fontWeight: 800, color: '#5865f2', letterSpacing: '-0.5px' }}>suva.</div>
+                    <div style={{ fontSize: '14px', color: '#b9bbbe', marginTop: '2px', marginBottom: '12px' }}>soxsuva</div>
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('adminModal');
-            if (event.target === modal) {
-                closeAdminModal();
-            }
-        }
-    </script>
-</body>
-</html>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+                        <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', color: '#d1d5db', border: '1px solid rgba(255, 255, 255, 0.05)' }}>⚡ ZFC</span>
+                        <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', color: '#d1d5db', border: '1px solid rgba(255, 255, 255, 0.05)' }}>✈️ Suva</span>
+                        <span style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', color: '#d1d5db', border: '1px solid rgba(255, 255, 255, 0.05)' }}>👑 VIP</span>
+                    </div>
+
+                    <a href="https://www.tiktok.com/@not.p1nk" target="_blank" rel="noreferrer" style={{ background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(236, 72, 153, 0.3)', borderRadius: '12px', padding: '12px', marginBottom: '16px', textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <svg style={{ width: '24px', height: '24px', fill: '#ec4899' }} viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.33 6.33 0 0 0 10.86 4.47 6.32 6.32 0 0 0 1.81-4.47V9.16a8.16 8.16 0 0 0 4.97 1.83V7.52a4.81 4.81 0 0 1-1.05-.83z"/></svg>
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: '#ec4899', textTransform: 'uppercase' }}>TikTok @not.p1nk</span>
+                            </div>
+                            <span style={{ fontSize: '12px', color: '#b9bbbe' }}>↗</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
+                            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '8px 4px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 700 }}>186</div>
+                                <div style={{ fontSize: '10px', color: '#b9bbbe', textTransform: 'uppercase', marginTop: '2px' }}>Following</div>
+                            </div>
+                            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '8px 4px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 700 }}>690</div>
+                                <div style={{ fontSize: '10px', color: '#b9bbbe', textTransform: 'uppercase', marginTop: '2px' }}>Followers</div>
+                            </div>
+                            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '8px 4px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 700 }}>4,395</div>
+                                <div style={{ fontSize: '10px', color: '#b9bbbe', textTransform: 'uppercase', marginTop: '2px' }}>Likes</div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <div style={{ background: 'rgba(0, 0, 0, 0.35)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '12px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#1db954', letterSpacing: '0.5px', marginBottom: '10px' }}>Listening to Audio</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <img src="/IMG_9145.jpeg" alt="Album Cover" style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} />
+                            <div style={{ flexGrow: 1 }}>
+                                <div style={{ fontSize: '15px', fontWeight: 700 }}>misery.</div>
+                                <div style={{ fontSize: '13px', color: '#b9bbbe' }}>pupsies</div>
+                            </div>
+                            <button onClick={toggleAudio} style={{ background: '#ffffff', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <span>{isPlaying ? '❚❚' : '▶'}</span>
+                            </button>
+                        </div>
+                        <audio ref={audioRef} loop src="/pupsies - misery. (Lyrics).mp3"></audio>
+                    </div>
+
+                    <div style={{ background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '12px', fontSize: '14px', lineHeight: '1.4', color: '#e1e1e1', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#b9bbbe', textTransform: 'uppercase', marginBottom: '4px' }}>Bio</div>
+                        <div>welcome to suva.</div>
+                    </div>
+
+                    <div onClick={() => setModalOpen(true)} style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255, 255, 255, 0.3)', cursor: 'pointer', paddingTop: '5px' }}>
+                        Created by suva.
+                    </div>
+                </div>
+            </div>
+
+            {modalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999 }}>
+                    <div style={{ background: '#12131a', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', padding: '24px', width: '90%', maxWidth: '360px', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8)' }}>
+                        {!loggedIn ? (
+                            <div>
+                                <h3 style={{ marginBottom: '16px', fontSize: '18px', textAlign: 'center' }}>Admin Access</h3>
+                                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '10px 12px', marginBottom: '12px', background: '#0b0c10', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: 'white', outline: 'none' }} />
+                                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '10px 12px', marginBottom: '12px', background: '#0b0c10', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: 'white', outline: 'none' }} />
+                                <button onClick={verifyAdmin} style={{ width: '100%', padding: '10px', background: '#5865f2', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>Login</button>
+                            </div>
+                        ) : (
+                            <div>
+                                <h4 style={{ color: '#23a55a', marginBottom: '10px' }}>System Status: Secure</h4>
+                                <p style={{ fontSize: '13px', color: '#b9bbbe', marginBottom: '12px' }}>Admin logged in as soxsuva@gmail.com</p>
+                                
+                                <label style={{ fontSize: '11px', fontWeight: 700, color: '#b9bbbe', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Background Color</label>
+                                <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} style={{ width: '100%', padding: '4px', height: '40px', background: '#0b0c10', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', cursor: 'pointer', marginBottom: '12px' }} />
+
+                                <label style={{ fontSize: '11px', fontWeight: 700, color: '#b9bbbe', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Cherry Blossom Color</label>
+                                <input type="color" value={petalColor} onChange={(e) => setPetalColor(e.target.value)} style={{ width: '100%', padding: '4px', height: '40px', background: '#0b0c10', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', cursor: 'pointer', marginBottom: '15px' }} />
+
+                                <button onClick={() => { setModalOpen(false); setLoggedIn(false); }} style={{ width: '100%', padding: '10px', background: '#da373c', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>Close Panel</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </main>
+    );
+}
